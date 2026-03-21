@@ -1,0 +1,58 @@
+# Luwah Technologies — Production n8n Stack
+# Deploy on Proxmox VM behind Cloudflare Tunnel
+#
+# Launch:
+#   export N8N_ENCRYPTION_KEY="<secure_random_string>" && \
+#   export DB_PASSWORD="<secure_db_password>" && \
+#   docker-compose up -d --force-recreate && \
+#   docker-compose logs -f n8n
+#
+# Verify:
+#   curl -I https://api.luwahtechnologies.com/healthz
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER:-n8n}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-n8n_secure_password}
+      - POSTGRES_DB=${DB_NAME:-n8n}
+    volumes:
+      - n8n_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h localhost -U ${DB_USER:-n8n} -d ${DB_NAME:-n8n}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=${DB_NAME:-n8n}
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=${DB_USER:-n8n}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD:-n8n_secure_password}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      # Tells n8n what its public URL is so webhook URLs match the Cloudflare Tunnel
+      - WEBHOOK_URL=https://api.luwahtechnologies.com/
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - GENERIC_TIMEZONE=America/Denver
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  n8n_postgres_data:
+  n8n_data:
