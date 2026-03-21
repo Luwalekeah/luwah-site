@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: luwah-technologies
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RESEND_API_KEY
+        sync: false
+      - key: N8N_WEBHOOK_URL
+        sync: false
+      - key: NEXT_PUBLIC_N8N_PARTIAL_WEBHOOK_URL
+        sync: false
+      - key: CLOUDFLARE_TURNSTILE_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SANITY_PROJECT_ID
+        sync: false
+      - key: NEXT_PUBLIC_SANITY_DATASET
+        value: production
+      - key: SANITY_API_TOKEN
+        sync: false
+      - key: CSRF_SECRET
+        sync: false
+      - key: WEBHOOK_HMAC_SECRET
+        sync: false
+      - key: REVALIDATION_SECRET
+        sync: false
