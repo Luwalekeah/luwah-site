@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
@@ -59,49 +60,70 @@ const SERVICE_CATEGORIES = [
 ];
 
 const TIERS = [
-  { tier: "Quick Wins", start: "$150", description: "Email setup, basic reporting, single-platform automation" },
-  { tier: "Core Projects", start: "$300", description: "Reminder systems, dashboards, win-back campaigns" },
-  { tier: "Premium Integrations", start: "$750", description: "Multi-system solutions, full analytics suites" },
-  { tier: "Ongoing Support", start: "$50/mo", description: "Hosting, monitoring, and maintenance" },
+  { tier: "Quick Win", start: "$150–$300", description: "Email setup, basic reporting, single-platform automation" },
+  { tier: "Core Project", start: "$300–$750", description: "Reminder systems, dashboards, win-back campaigns" },
+  { tier: "Premium Integration", start: "$750–$1,500+", description: "Multi-system solutions, full analytics suites" },
+  { tier: "Ongoing Support", start: "$50–$200/mo", description: "Hosting, monitoring, and maintenance" },
 ];
 
 export function ServicesContent() {
   const [openCat, setOpenCat] = useState<number | null>(0);
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <div className="pt-24" ref={ref}>
-      {/* Hero */}
+      {/* Hero with image */}
       <section className="py-24 md:py-32">
-        <div className="mx-auto max-w-[1200px] px-6">
-          <p className="section-label">Services</p>
-          <h1
-            className="mb-6 text-4xl font-bold md:text-6xl"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            What We Build
-          </h1>
-          <p
-            className="mb-16 max-w-2xl text-lg leading-relaxed"
-            style={{ color: "var(--color-text-secondary)" }}
-          >
-            Most small business software handles the basics well. But when you
-            need systems to talk to each other, reports that show actual profit,
-            or customers that keep coming back automatically&mdash;that&apos;s where
-            standard tools fall short. These services show what&apos;s possible.
-            Your project will be scoped to your business after a free consultation.
-          </p>
+        <div className="mx-auto max-w-[var(--container-max)] px-6">
+          <div className="mb-16 grid items-center gap-12 md:grid-cols-2">
+            <div>
+              <h1
+                className="mb-6 text-4xl font-bold md:text-5xl"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                What we build
+              </h1>
+              <p
+                className="max-w-lg text-lg leading-relaxed"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                Most small business software handles the basics. But when you
+                need systems to talk to each other, reports that show actual
+                profit, or customers that keep coming back
+                automatically&mdash;that&apos;s where standard tools fall short.
+              </p>
+            </div>
+            <div
+              className="relative hidden aspect-[4/3] overflow-hidden rounded-xl md:block"
+              style={{ border: "1px solid var(--color-border)" }}
+            >
+              <Image
+                src="/images/cdubby-arm-7014655.jpg"
+                alt="AI-powered automation"
+                fill
+                className="object-cover"
+                sizes="550px"
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, rgba(9,9,11,0.2), rgba(9,9,11,0.5))",
+                }}
+              />
+            </div>
+          </div>
 
           {/* Categories accordion */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {SERVICE_CATEGORIES.map((cat, catIdx) => (
               <motion.div
                 key={cat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: catIdx * 0.08 }}
-                className="glass-card overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={inView ? { opacity: 1 } : {}}
+                transition={{ duration: 0.4, delay: catIdx * 0.06 }}
+                className="card overflow-hidden"
               >
                 <button
                   onClick={() => setOpenCat(openCat === catIdx ? null : catIdx)}
@@ -113,7 +135,7 @@ export function ServicesContent() {
                   }}
                 >
                   <h2
-                    className="text-lg font-bold"
+                    className="text-base font-semibold"
                     style={{
                       fontFamily: "var(--font-display)",
                       color: "var(--color-text-primary)",
@@ -122,12 +144,11 @@ export function ServicesContent() {
                     {cat.title}
                   </h2>
                   <ChevronDown
-                    size={20}
+                    size={18}
+                    className="shrink-0 transition-transform duration-200"
                     style={{
-                      color: "var(--color-copper)",
+                      color: "var(--color-text-muted)",
                       transform: openCat === catIdx ? "rotate(180deg)" : "rotate(0)",
-                      transition: "transform 0.25s ease",
-                      flexShrink: 0,
                     }}
                   />
                 </button>
@@ -137,26 +158,24 @@ export function ServicesContent() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
+                      transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div
-                        className="grid gap-4 px-6 pb-6 md:grid-cols-2"
-                      >
+                      <div className="grid gap-3 px-6 pb-6 md:grid-cols-2">
                         {cat.services.map((s) => (
                           <div
                             key={s.name}
-                            className="rounded-xl p-5"
+                            className="rounded-lg p-5"
                             style={{
-                              backgroundColor: "var(--color-bg-tertiary)",
-                              border: "1px solid var(--color-border-default)",
+                              backgroundColor: "var(--color-bg-elevated)",
+                              border: "1px solid var(--color-border)",
                             }}
                           >
                             <h3
-                              className="mb-2 text-sm font-bold"
+                              className="mb-2 text-sm font-semibold"
                               style={{
                                 fontFamily: "var(--font-display)",
-                                color: "var(--color-copper-light)",
+                                color: "var(--color-copper)",
                               }}
                             >
                               {s.name}
@@ -181,22 +200,23 @@ export function ServicesContent() {
 
       {/* Investment Tiers */}
       <section
+        id="pricing"
         className="py-24 md:py-32"
         style={{ backgroundColor: "var(--color-bg-secondary)" }}
       >
-        <div className="mx-auto max-w-[1200px] px-6">
+        <div className="mx-auto max-w-[var(--container-max)] px-6">
           <h2
             className="mb-12 text-3xl font-bold md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Investment Levels
+            Investment levels
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
             {TIERS.map((t) => (
-              <div key={t.tier} className="glass-card p-6">
+              <div key={t.tier} className="card p-6">
                 <h3
-                  className="mb-1 text-sm font-bold"
-                  style={{ fontFamily: "var(--font-display)", color: "var(--color-copper)" }}
+                  className="mb-1 text-xs font-semibold uppercase tracking-widest"
+                  style={{ color: "var(--color-copper)" }}
                 >
                   {t.tier}
                 </h3>
@@ -204,7 +224,7 @@ export function ServicesContent() {
                   className="mb-3 text-2xl font-bold"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Starting at {t.start}
+                  {t.start}
                 </div>
                 <p
                   className="text-xs leading-relaxed"

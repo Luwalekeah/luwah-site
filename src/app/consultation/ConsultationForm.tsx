@@ -161,21 +161,16 @@ export function ConsultationForm() {
 
   const next = () => {
     if (step < 3 && canAdvance()) {
-      // Fire-and-forget partial capture to n8n on each step completion
-      if (step === 0) {
-        capturePartialLead(form.fullName, form.email, 1);
-      } else if (step === 1) {
-        capturePartialLead(form.fullName, form.email, 2);
-      } else if (step === 2) {
-        capturePartialLead(form.fullName, form.email, 3);
-      }
+      if (step === 0) capturePartialLead(form.fullName, form.email, 1);
+      else if (step === 1) capturePartialLead(form.fullName, form.email, 2);
+      else if (step === 2) capturePartialLead(form.fullName, form.email, 3);
       setStep(step + 1);
     }
   };
 
   const inputStyle = {
-    backgroundColor: "var(--color-bg-tertiary)",
-    border: "1px solid var(--color-border-default)",
+    backgroundColor: "var(--color-bg-input)",
+    border: "1px solid var(--color-border)",
     color: "var(--color-text-primary)",
     fontFamily: "var(--font-body)",
   };
@@ -183,9 +178,16 @@ export function ConsultationForm() {
   const labelStyle = {
     color: "var(--color-text-primary)",
     fontFamily: "var(--font-display)" as const,
-    fontWeight: 600 as const,
+    fontWeight: 500 as const,
     fontSize: "0.875rem",
   };
+
+  const chipStyle = (active: boolean) => ({
+    backgroundColor: active ? "var(--color-copper-subtle)" : "var(--color-bg-elevated)",
+    border: `1px solid ${active ? "var(--color-copper)" : "var(--color-border)"}`,
+    color: active ? "var(--color-copper)" : "var(--color-text-secondary)",
+    cursor: "pointer" as const,
+  });
 
   if (status === "sent") {
     return (
@@ -193,14 +195,9 @@ export function ConsultationForm() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass-card mx-6 max-w-lg p-12 text-center"
+          className="card mx-6 max-w-lg p-12 text-center"
         >
-          <div
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
-            style={{ backgroundColor: "rgba(184,115,51,0.15)" }}
-          >
-            <Check size={32} style={{ color: "var(--color-copper)" }} />
-          </div>
+          <Check size={32} className="mx-auto mb-6" style={{ color: "var(--color-copper)" }} />
           <h2
             className="mb-3 text-2xl font-bold"
             style={{ fontFamily: "var(--font-display)" }}
@@ -209,8 +206,7 @@ export function ConsultationForm() {
           </h2>
           <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
             Daniel will review your submission and reach out within 24 hours to
-            schedule your free 30-minute consultation. Check your email for a
-            confirmation.
+            schedule your free 30-minute consultation.
           </p>
         </motion.div>
       </div>
@@ -220,34 +216,31 @@ export function ConsultationForm() {
   return (
     <div className="pt-24">
       <section className="py-16 md:py-24">
-        <div className="mx-auto max-w-[700px] px-6">
-          {/* Header */}
-          <p className="section-label text-center">Free Consultation</p>
+        <div className="mx-auto max-w-[640px] px-6">
           <h1
-            className="mb-4 text-center text-3xl font-bold md:text-4xl"
+            className="mb-3 text-center text-3xl font-bold md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Book a Free Consultation
+            Book a free consultation
           </h1>
           <p
-            className="mx-auto mb-12 max-w-lg text-center text-base"
+            className="mx-auto mb-12 max-w-md text-center text-sm"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            You&apos;ll hear from Daniel within 24 hours. The call is 30 minutes,
-            focused entirely on your business &mdash; not a sales pitch.
+            30 minutes, focused entirely on your business. You&apos;ll hear
+            from Daniel within 24 hours.
           </p>
 
-          {/* Progress dots */}
+          {/* Progress */}
           <div className="mb-10 flex items-center justify-center gap-3">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center gap-3">
                 <button
                   onClick={() => i < step && setStep(i)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all"
                   style={{
-                    backgroundColor:
-                      i <= step ? "var(--color-copper)" : "var(--color-bg-tertiary)",
-                    color: i <= step ? "white" : "var(--color-text-muted)",
+                    backgroundColor: i <= step ? "var(--color-copper)" : "var(--color-bg-elevated)",
+                    color: i <= step ? "#09090b" : "var(--color-text-muted)",
                     border: "none",
                     cursor: i < step ? "pointer" : "default",
                     fontFamily: "var(--font-display)",
@@ -259,8 +252,7 @@ export function ConsultationForm() {
                   <div
                     className="h-px w-8"
                     style={{
-                      backgroundColor:
-                        i < step ? "var(--color-copper)" : "var(--color-border-default)",
+                      backgroundColor: i < step ? "var(--color-copper)" : "var(--color-border)",
                     }}
                   />
                 )}
@@ -268,14 +260,14 @@ export function ConsultationForm() {
             ))}
           </div>
           <p
-            className="mb-8 text-center text-sm font-semibold"
-            style={{ fontFamily: "var(--font-display)", color: "var(--color-copper)" }}
+            className="mb-8 text-center text-sm font-medium"
+            style={{ color: "var(--color-copper)" }}
           >
             {STEPS[step]}
           </p>
 
-          {/* Form Steps */}
-          <div className="glass-card overflow-hidden p-8">
+          {/* Form */}
+          <div className="card p-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
@@ -321,7 +313,7 @@ export function ConsultationForm() {
                 {step === 1 && (
                   <div className="flex flex-col gap-5">
                     <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                      Understanding your current tools helps us identify integration opportunities. All fields are optional.
+                      Understanding your current tools helps us identify integration opportunities. All fields optional.
                     </p>
                     {[
                       { label: "POS System", key: "pos" as const, opts: ["Square", "Clover", "Toast", "Shopify POS", "None", "Other"] },
@@ -349,7 +341,7 @@ export function ConsultationForm() {
                     <div>
                       <label className="mb-1.5 block" style={labelStyle}>What&apos;s your biggest challenge? *</label>
                       <p className="mb-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                        Describe what&apos;s taking up too much of your time or what process frustrates you most. (Min 20 characters)
+                        Describe what&apos;s taking up too much time or what process frustrates you most. (Min 20 characters)
                       </p>
                       <textarea value={form.biggestChallenge} onChange={(e) => update({ biggestChallenge: e.target.value })} rows={4} className="w-full resize-y rounded-lg px-4 py-3 text-sm outline-none" style={inputStyle} />
                     </div>
@@ -358,13 +350,8 @@ export function ConsultationForm() {
                       <div className="flex flex-wrap gap-2">
                         {HELP_AREAS.map((area) => (
                           <button key={area} type="button" onClick={() => toggleArray("helpAreas", area)}
-                            className="rounded-full px-3 py-1.5 text-xs transition-all"
-                            style={{
-                              backgroundColor: form.helpAreas.includes(area) ? "rgba(184,115,51,0.2)" : "var(--color-bg-tertiary)",
-                              border: `1px solid ${form.helpAreas.includes(area) ? "var(--color-copper)" : "var(--color-border-default)"}`,
-                              color: form.helpAreas.includes(area) ? "var(--color-copper-light)" : "var(--color-text-secondary)",
-                              cursor: "pointer",
-                            }}>
+                            className="rounded-md px-3 py-1.5 text-xs transition-all"
+                            style={chipStyle(form.helpAreas.includes(area))}>
                             {area}
                           </button>
                         ))}
@@ -372,18 +359,11 @@ export function ConsultationForm() {
                     </div>
                     <div>
                       <label className="mb-2 block" style={labelStyle}>How urgent is this?</label>
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-wrap gap-2">
                         {["Just exploring", "Planning for next quarter", "Need help now"].map((opt) => (
                           <button key={opt} type="button" onClick={() => update({ urgency: opt })}
-                            className="rounded-lg px-4 py-2 text-sm transition-all"
-                            style={{
-                              backgroundColor: form.urgency === opt ? "rgba(184,115,51,0.2)" : "var(--color-bg-tertiary)",
-                              border: `1px solid ${form.urgency === opt ? "var(--color-copper)" : "var(--color-border-default)"}`,
-                              color: form.urgency === opt ? "var(--color-copper-light)" : "var(--color-text-secondary)",
-                              cursor: "pointer",
-                              fontFamily: "var(--font-display)",
-                              fontWeight: 500,
-                            }}>
+                            className="rounded-md px-4 py-2 text-sm transition-all"
+                            style={chipStyle(form.urgency === opt)}>
                             {opt}
                           </button>
                         ))}
@@ -403,18 +383,11 @@ export function ConsultationForm() {
                     </div>
                     <div>
                       <label className="mb-2 block" style={labelStyle}>Preferred contact method *</label>
-                      <div className="flex gap-3">
+                      <div className="flex gap-2">
                         {["Email", "Phone", "Either works"].map((opt) => (
                           <button key={opt} type="button" onClick={() => update({ preferredContact: opt })}
-                            className="rounded-lg px-4 py-2 text-sm transition-all"
-                            style={{
-                              backgroundColor: form.preferredContact === opt ? "rgba(184,115,51,0.2)" : "var(--color-bg-tertiary)",
-                              border: `1px solid ${form.preferredContact === opt ? "var(--color-copper)" : "var(--color-border-default)"}`,
-                              color: form.preferredContact === opt ? "var(--color-copper-light)" : "var(--color-text-secondary)",
-                              cursor: "pointer",
-                              fontFamily: "var(--font-display)",
-                              fontWeight: 500,
-                            }}>
+                            className="rounded-md px-4 py-2 text-sm transition-all"
+                            style={chipStyle(form.preferredContact === opt)}>
                             {opt}
                           </button>
                         ))}
@@ -425,13 +398,8 @@ export function ConsultationForm() {
                       <div className="flex flex-wrap gap-2">
                         {["Weekday mornings", "Weekday afternoons", "Weekday evenings", "Weekends"].map((t) => (
                           <button key={t} type="button" onClick={() => toggleArray("availability", t)}
-                            className="rounded-full px-3 py-1.5 text-xs transition-all"
-                            style={{
-                              backgroundColor: form.availability.includes(t) ? "rgba(74,144,164,0.2)" : "var(--color-bg-tertiary)",
-                              border: `1px solid ${form.availability.includes(t) ? "var(--color-lake)" : "var(--color-border-default)"}`,
-                              color: form.availability.includes(t) ? "var(--color-lake-light)" : "var(--color-text-secondary)",
-                              cursor: "pointer",
-                            }}>
+                            className="rounded-md px-3 py-1.5 text-xs transition-all"
+                            style={chipStyle(form.availability.includes(t))}>
                             {t}
                           </button>
                         ))}
@@ -444,7 +412,7 @@ export function ConsultationForm() {
                         {REFERRAL_SOURCES.map((o) => (<option key={o} value={o}>{o}</option>))}
                       </select>
                     </div>
-                    <label className="mt-4 flex items-start gap-3" style={{ cursor: "pointer" }}>
+                    <label className="mt-2 flex items-start gap-3" style={{ cursor: "pointer" }}>
                       <input type="checkbox" checked={form.consent} onChange={(e) => update({ consent: e.target.checked })}
                         className="mt-1 h-4 w-4 rounded"
                         style={{ accentColor: "var(--color-copper)" }} />
@@ -487,12 +455,11 @@ export function ConsultationForm() {
             )}
           </div>
 
-          {/* Trust elements */}
           <div className="mt-8 flex flex-wrap justify-center gap-6 text-xs" style={{ color: "var(--color-text-muted)" }}>
             <span>30-minute free call</span>
-            <span>\u2022</span>
+            <span>&middot;</span>
             <span>No sales pitch</span>
-            <span>\u2022</span>
+            <span>&middot;</span>
             <span>Response within 24 hours</span>
           </div>
         </div>

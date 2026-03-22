@@ -4,13 +4,17 @@ import Link from "next/link";
 import Image from "next/image";
 
 const FOOTER_LINKS = {
-  explore: [
+  services: [
     { href: "/services", label: "Services" },
-    { href: "/work", label: "Portfolio" },
-    { href: "/#pricing", label: "Pricing" },
-    { href: "/blog", label: "Blog" },
+    { href: "/work", label: "Work" },
+    { href: "/services#pricing", label: "Pricing" },
+    { href: "/consultation", label: "Free Consultation" },
+  ],
+  company: [
     { href: "/about", label: "About" },
+    { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
+    { href: "/#faq", label: "FAQ" },
   ],
   legal: [
     { href: "/terms", label: "Terms & Conditions" },
@@ -22,45 +26,24 @@ export function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: "var(--color-bg-secondary)",
-        borderTop: "1px solid var(--color-border-default)",
+        backgroundColor: "var(--color-bg-primary)",
+        borderTop: "1px solid var(--color-border)",
       }}
     >
-      {/* Pre-footer CTA */}
-      <section
-        className="overflow-hidden py-8"
-        style={{ borderBottom: "1px solid var(--color-border-default)" }}
-      >
-        <div
-          className="whitespace-nowrap text-5xl font-bold opacity-10 md:text-7xl"
-          style={{
-            fontFamily: "var(--font-display)",
-            color: "var(--color-text-primary)",
-            animation: "scroll-left 20s linear infinite",
-          }}
-        >
-          Work smarter, not harder. Automate the busywork. Work smarter, not
-          harder. Automate the busywork.&nbsp;
-        </div>
-      </section>
-
       {/* CTA Block */}
-      <section className="py-16 text-center">
+      <section className="py-20 text-center">
         <h2
-          className="mb-4 text-2xl font-semibold md:text-3xl"
-          style={{
-            fontFamily: "var(--font-display)",
-            color: "var(--color-text-primary)",
-          }}
+          className="mb-4 text-3xl font-bold md:text-4xl"
+          style={{ fontFamily: "var(--font-display)" }}
         >
-          Your Business. Supercharged with Automation.
+          Ready to automate?
         </h2>
         <p
-          className="mx-auto mb-8 max-w-lg text-base"
+          className="mx-auto mb-8 max-w-md text-base"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Save time, boost efficiency, and streamline your operations with
-          workflow automation from Luwah Technologies.
+          Book a free consultation and we&apos;ll map out what to automate
+          first.
         </p>
         <Link href="/consultation" className="btn-primary">
           Book a Free Consultation
@@ -69,86 +52,78 @@ export function Footer() {
 
       {/* Footer Grid */}
       <section
-        className="mx-auto max-w-[1200px] px-6 py-12"
-        style={{ borderTop: "1px solid var(--color-border-default)" }}
+        className="mx-auto max-w-[var(--container-max)] px-6 py-12"
+        style={{ borderTop: "1px solid var(--color-border)" }}
       >
-        <div className="grid gap-12 md:grid-cols-3">
-          {/* Brand */}
+        <div className="mb-10 flex items-center gap-3">
+          <Image
+            src="/images/logo-favicon.png"
+            alt="Luwah Technologies"
+            width={44}
+            height={44}
+            style={{ height: "auto" }}
+          />
           <div>
-            <Image
-              src="/images/Luwah Technologies LLC_LOGO D5.png"
-              alt="Luwah Technologies"
-              width={140}
-              height={35}
-              style={{ height: "auto", marginBottom: "0.5rem" }}
-            />
+            <div
+              className="text-2xl font-bold tracking-tight"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <span style={{ color: "var(--color-copper)" }}>Luwah</span>{" "}
+              <span style={{ color: "#4A90A4" }}>Technologies</span>
+            </div>
             <p
-              className="text-sm italic"
+              className="text-sm"
               style={{ color: "var(--color-text-muted)" }}
             >
               Where Simplicity Meets Innovation.
             </p>
           </div>
-
-          {/* Explore */}
-          <div>
-            <h4
-              className="section-label mb-4"
-              style={{ color: "var(--color-copper)" }}
-            >
-              Explore
-            </h4>
-            <ul className="flex flex-col gap-2">
-              {FOOTER_LINKS.explore.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm no-underline transition-colors duration-200"
-                    style={{ color: "var(--color-text-secondary)" }}
-                    onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                      ((e.target as HTMLAnchorElement).style.color =
-                        "var(--color-copper-light)")
-                    }
-                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                      ((e.target as HTMLAnchorElement).style.color =
-                        "var(--color-text-secondary)")
-                    }
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4
-              className="section-label mb-4"
-              style={{ color: "var(--color-copper)" }}
-            >
-              Legal
-            </h4>
-            <ul className="flex flex-col gap-2">
-              {FOOTER_LINKS.legal.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm no-underline transition-colors duration-200"
-                    style={{ color: "var(--color-text-secondary)" }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
-        {/* Bottom Bar */}
+        <div className="grid grid-cols-3 gap-8 md:gap-16">
+
+          {(
+            [
+              { title: "Services", links: FOOTER_LINKS.services },
+              { title: "Company", links: FOOTER_LINKS.company },
+              { title: "Legal", links: FOOTER_LINKS.legal },
+            ] as const
+          ).map((section) => (
+            <div key={section.title}>
+              <h4
+                className="mb-4 text-xs font-semibold uppercase tracking-widest"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                {section.title}
+              </h4>
+              <ul className="flex flex-col gap-2">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm no-underline transition-colors duration-200"
+                      style={{ color: "var(--color-text-secondary)" }}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
+                        ((e.target as HTMLAnchorElement).style.color =
+                          "var(--color-text-primary)")
+                      }
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
+                        ((e.target as HTMLAnchorElement).style.color =
+                          "var(--color-text-secondary)")
+                      }
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
         <div
           className="mt-12 flex flex-col items-center justify-between gap-4 pt-8 md:flex-row"
-          style={{ borderTop: "1px solid var(--color-border-default)" }}
+          style={{ borderTop: "1px solid var(--color-border)" }}
         >
           <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
             &copy; {new Date().getFullYear()} Luwah Technologies LLC. All rights

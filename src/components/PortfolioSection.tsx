@@ -3,17 +3,32 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 
 const PROJECTS = [
   {
-    slug: "zero-cost-business-infrastructure",
-    category: "Operations",
-    title: "I Got Quoted $600 for a Website. I Built One in 3 Days for $0.",
+    slug: "eloquence-wax-skin",
+    category: "Web Design & Infrastructure",
+    title: "Full Digital Presence for a Premium Waxing & Skincare Studio",
     description:
-      "Deployed a fully branded landing page with legal docs, contact forms, and a resource hub\u2014all self-hosted, zero monthly fees.",
+      "Custom Next.js website, business email, self-hosted link hub, and Cloudflare infrastructure — delivered end-to-end for a beauty brand launching from scratch.",
+    image: "/images/pexels-sejio402-6704970.jpg",
     metrics: [
-      { value: "$0/mo", label: "Recurring costs" },
-      { value: "100%", label: "Ownership" },
+      { value: "Sub-second", label: "Load time" },
+      { value: "$0/mo", label: "Email cost" },
+    ],
+  },
+  {
+    slug: "denver-racquet-club-gmail-automation",
+    category: "Operations",
+    title: "Gmail to Google Sheets: A Racquet Club's Contact Forms on Autopilot",
+    description:
+      "A native Google Apps Script pipeline that monitors Gmail for Wix form submissions, parses contact fields, flags profanity, and analyzes sentiment — twice daily, zero dependencies.",
+    image: "/images/pexels-brett-sayles-4520560.jpg",
+    metrics: [
+      { value: "2x/day", label: "Auto-runs" },
+      { value: "0", label: "Manual entry" },
     ],
   },
   {
@@ -21,156 +36,111 @@ const PROJECTS = [
     category: "Sales & Marketing",
     title: "How I Turned Google Maps Into a Statewide Sales Machine",
     description:
-      "An automated pipeline scrapes emails, pulls owner names from public records, and exports ready-to-contact leads\u201490% faster.",
+      "An automated pipeline scrapes emails, pulls owner names from public records, and exports ready-to-contact leads — 90% faster.",
+    image: "/images/geralt-ai-10171006_1920.jpg",
     metrics: [
       { value: "60%", label: "Hours saved" },
       { value: "Daily", label: "Automated outreach" },
-    ],
-  },
-  {
-    slug: "automated-community-messaging",
-    category: "Communications",
-    title: "This iPhone Automation Runs a Chess Club (Without the Organizer)",
-    description:
-      "An Apple Shortcut reads the schedule, writes personalized messages, and posts to WhatsApp. Zero cost. 100% hands-free.",
-    metrics: [
-      { value: "100%", label: "Consistency" },
-      { value: "0", label: "Manual effort" },
-    ],
-  },
-  {
-    slug: "self-hosted-cloud-storage",
-    category: "Cloud & Backup",
-    title: "I Canceled iCloud, Google Drive, and Arlo\u2014Here\u2019s What Replaced Them",
-    description:
-      "Photos, files, and security footage on my own server with full 3-2-1 backups. Tech companies don\u2019t own my data anymore.",
-    metrics: [
-      { value: "85%", label: "Cost reduction" },
-      { value: "3-2-1", label: "Backup redundancy" },
-    ],
-  },
-  {
-    slug: "doyle-group-resume-formatter",
-    category: "Staffing & Operations",
-    title: "Automated Resume Formatting Saves a Staffing Firm 20+ Hours a Week",
-    description:
-      "n8n + Claude AI pipeline: resumes upload, PII is scrubbed, content restructures into branded DOCX templates\u2014in under 60 seconds.",
-    metrics: [
-      { value: "<60s", label: "Per resume" },
-      { value: "20+ hrs", label: "Saved weekly" },
     ],
   },
 ];
 
 export function PortfolioSection() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section
-      className="relative py-24 md:py-32"
-      style={{ backgroundColor: "var(--color-bg-secondary)" }}
-      ref={ref}
-    >
-      <div className="mx-auto max-w-[1200px] px-6">
-        <p className="section-label">Portfolio</p>
+    <section className="py-24 md:py-32" ref={ref}>
+      <div className="mx-auto max-w-[var(--container-max)] px-6">
         <h2
-          className="mb-4 text-3xl font-bold md:text-5xl"
+          className="mb-4 text-3xl font-bold md:text-4xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Our Recent Work
+          Recent work
         </h2>
         <p
-          className="mb-16 max-w-lg text-base"
+          className="mb-14 max-w-lg text-base"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Real success stories from businesses that scaled smarter with Luwah
-          Technologies automation services.
+          Real results from businesses that scaled smarter with automation.
         </p>
 
-        {/* Top row: 2 cards */}
-        <div className="mb-6 grid gap-6 md:grid-cols-2">
-          {PROJECTS.slice(0, 2).map((project, i) => (
-            <ProjectCard key={project.slug} project={project} index={i} inView={inView} />
+        <div className="flex flex-col gap-4">
+          {PROJECTS.map((project, i) => (
+            <Link key={project.slug} href={`/work/${project.slug}`} className="no-underline">
+            <motion.article
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className="card group flex flex-col overflow-hidden transition-colors duration-200 md:flex-row"
+              style={{ cursor: "pointer" }}
+              whileHover={{ borderColor: "rgba(212, 146, 79, 0.3)" }}
+            >
+              <div className="relative h-48 w-full shrink-0 md:h-auto md:w-56">
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="flex flex-1 flex-col justify-between gap-6 p-7 md:flex-row md:items-start md:p-8">
+                <div className="flex-1">
+                  <span
+                    className="mb-3 block text-xs font-semibold uppercase tracking-widest"
+                    style={{ color: "var(--color-copper)" }}
+                  >
+                    {project.category}
+                  </span>
+                  <h3
+                    className="mb-2 text-lg font-semibold"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {project.title}
+                  </h3>
+                  <p
+                    className="max-w-xl text-sm leading-relaxed"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    {project.description}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 gap-8 md:gap-10">
+                  {project.metrics.map((metric) => (
+                    <div key={metric.label} className="text-right">
+                      <div
+                        className="text-2xl font-bold"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {metric.value}
+                      </div>
+                      <div
+                        className="text-xs"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {metric.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.article>
+            </Link>
           ))}
         </div>
 
-        {/* Middle row: 2 cards */}
-        <div className="mb-6 grid gap-6 md:grid-cols-2">
-          {PROJECTS.slice(2, 4).map((project, i) => (
-            <ProjectCard key={project.slug} project={project} index={i + 2} inView={inView} />
-          ))}
-        </div>
-
-        {/* Bottom: featured card full width */}
-        <ProjectCard project={PROJECTS[4]} index={4} inView={inView} featured />
-
-        <div className="mt-12 text-center">
-          <Link href="/work" className="btn-secondary">
+        <div className="mt-10">
+          <Link
+            href="/work"
+            className="btn-secondary inline-flex items-center gap-2"
+          >
             View Full Portfolio
+            <ArrowUpRight size={16} />
           </Link>
         </div>
       </div>
     </section>
-  );
-}
-
-function ProjectCard({
-  project,
-  index,
-  inView,
-  featured = false,
-}: {
-  project: (typeof PROJECTS)[0];
-  index: number;
-  inView: boolean;
-  featured?: boolean;
-}) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 30 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`glass-card flex flex-col overflow-hidden ${featured ? "mt-6" : ""}`}
-    >
-      <div className="flex flex-1 flex-col p-8">
-        <span
-          className="mb-4 text-xs font-semibold uppercase tracking-wider"
-          style={{ color: "var(--color-copper)", fontFamily: "var(--font-display)" }}
-        >
-          {project.category}
-        </span>
-        <h3
-          className="mb-3 text-lg font-bold leading-snug md:text-xl"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {project.title}
-        </h3>
-        <p
-          className="mb-6 flex-1 text-sm leading-relaxed"
-          style={{ color: "var(--color-text-secondary)" }}
-        >
-          {project.description}
-        </p>
-        <div className="flex gap-8">
-          {project.metrics.map((metric) => (
-            <div key={metric.label}>
-              <div
-                className="text-2xl font-bold"
-                style={{ fontFamily: "var(--font-display)", color: "var(--color-lake-light)" }}
-              >
-                {metric.value}
-              </div>
-              <div
-                className="text-xs"
-                style={{ color: "var(--color-text-muted)" }}
-              >
-                {metric.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </motion.article>
   );
 }

@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Luwah Technologies | Small Business Automation",
+    default: "Luwah Technologies",
     template: "%s | Luwah Technologies",
   },
   description:
@@ -45,6 +45,10 @@ export const metadata: Metadata = {
       "Custom automation for small businesses. n8n, Python, AI-powered. Free consultation.",
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: "/images/logo-favicon.png",
+    apple: "/images/logo-favicon.png",
+  },
 };
 
 export default function RootLayout({
