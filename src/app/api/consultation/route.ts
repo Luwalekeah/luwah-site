@@ -7,9 +7,10 @@ import crypto from "crypto";
  * Receives the intake form submission from the frontend.
  * 1. Validates required fields (server-side)
  * 2. Verifies Cloudflare Turnstile token
- * 3. Signs payload with HMAC for n8n verification
+ * 3. Flattens payload and signs with HMAC for n8n verification
  * 4. Forwards to n8n webhook via Cloudflare Tunnel
- * 5. Sends confirmation email via Resend
+ *
+ * Confirmation email is sent by n8n after processing.
  */
 export async function POST(request: Request) {
   try {
@@ -53,14 +54,26 @@ export async function POST(request: Request) {
       }
     }
 
-    // --- 3. Generate submission ID and sign payload ---
+    // --- 3. Generate submission ID and flatten payload for n8n ---
     const submissionId = crypto.randomUUID();
     const payload = {
-      ...body,
       submission_id: submissionId,
       lead_status: "complete",
+      fullName: body.contact?.full_name || "",
+      email: body.contact?.email || "",
+      phone: body.contact?.phone || "",
+      preferred_contact: body.contact?.preferred_contact || "Email",
+      companyName: body.business?.name || "",
+      industry: body.business?.industry || "",
+      pos: body.business?.current_tools?.pos || "",
+      booking: body.business?.current_tools?.booking || "",
+      accounting: body.business?.current_tools?.accounting || "",
+      message: body.needs?.biggest_challenge || "",
+      help_areas: body.needs?.help_areas || [],
+      urgency: body.needs?.urgency || "",
+      budget_range: body.budget_range || "",
+      referral_source: body.referral_source || "",
       metadata: {
-        ...body.metadata,
         submitted_at: new Date().toISOString(),
         ip_hash: crypto
           .createHash("sha256")
@@ -98,39 +111,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // --- 5. Send confirmation email via Resend ---
-    const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
-      try {
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${resendKey}`,
-          },
-          body: JSON.stringify({
-            from: "Daniel Cooke <hello@luwahtechnologies.com>",
-            to: body.contact.email,
-            subject:
-              "Got it \u2014 I'll be in touch within 24 hours",
-            html: `
-              <p>Hi ${body.contact.full_name.split(" ")[0]},</p>
-              <p>Thanks for reaching out. I've received your consultation request and I'm already reviewing the details about ${body.business.name}.</p>
-              <p><strong>Here's what happens next:</strong></p>
-              <ul>
-                <li>I'll review your submission and do some prep work</li>
-                <li>You'll hear from me within 24 hours to schedule our free 30-minute consultation</li>
-                <li>The call will focus specifically on what you described \u2014 no generic sales pitch</li>
-              </ul>
-              <p>Your reference number is <strong>${submissionId}</strong>.</p>
-              <p>Talk soon,<br/>Daniel Cooke<br/>Luwah Technologies LLC<br/>(720) 421-7184 | luwahtechnologies.com</p>
-            `,
-          }),
-        });
-      } catch (emailError) {
-        console.error("Resend confirmation failed:", emailError);
-      }
-    }
+    // Confirmation email is handled by n8n workflow (Resend → Confirm to User)
 
     return NextResponse.json({
       success: true,
