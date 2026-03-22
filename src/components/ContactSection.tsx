@@ -21,7 +21,14 @@ export function ContactSection() {
     setStatus("sending");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error("Failed to send");
+
       setStatus("sent");
       setFormData({ fullName: "", companyName: "", email: "", message: "" });
       setTimeout(() => setStatus("idle"), 5000);
@@ -123,20 +130,33 @@ export function ContactSection() {
             transition={{ duration: 0.4, delay: 0.1 }}
           >
             {status === "sent" ? (
-              <div className="card flex flex-col items-center justify-center p-12 text-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="card flex flex-col items-center justify-center p-12 text-center"
+              >
+                <div
+                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-full"
+                  style={{ backgroundColor: "var(--color-copper-subtle)" }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-copper)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
                 <h3
                   className="mb-2 text-xl font-semibold"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Message sent
+                  Thank you!
                 </h3>
                 <p
                   className="text-sm"
                   style={{ color: "var(--color-text-secondary)" }}
                 >
-                  We&apos;ll get back to you within 24 hours.
+                  Your message has been received. We&apos;ll be in touch within 24 hours.
                 </p>
-              </div>
+              </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div>

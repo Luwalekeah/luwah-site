@@ -109,7 +109,7 @@ export async function POST(request: Request) {
             Authorization: `Bearer ${resendKey}`,
           },
           body: JSON.stringify({
-            from: "Daniel Cooke <daniel@luwahtechnologies.com>",
+            from: "Daniel Cooke <hello@luwahtechnologies.com>",
             to: body.contact.email,
             subject:
               "Got it \u2014 I'll be in touch within 24 hours",
