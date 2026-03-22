@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -20,9 +21,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Forward to n8n webhook for logging + email sending
-    const webhookBaseUrl = process.env.NEXT_PUBLIC_N8N_PARTIAL_WEBHOOK_URL;
-    if (!webhookBaseUrl) {
+    // Forward to n8n webhook with HMAC signature
+    const webhookUrl = process.env.N8N_WEBHOOK_URL;
+    if (!webhookUrl) {
       console.error("N8N webhook URL not configured");
       return NextResponse.json(
         { error: "Webhook not configured" },
@@ -30,19 +31,46 @@ export async function POST(request: Request) {
       );
     }
 
-    const webhookUrl = `${webhookBaseUrl}/contact`;
     const payload = {
+      submission_id: crypto.randomUUID(),
+      lead_status: "complete",
       fullName: body.fullName,
-      companyName: body.companyName || "",
       email: body.email,
+      phone: "",
+      preferred_contact: "Email",
+      companyName: body.companyName || "",
+      industry: "",
+      pos: "",
+      booking: "",
+      accounting: "",
       message: body.message,
-      submitted_at: new Date().toISOString(),
-      source: "contact-form",
+      help_areas: [],
+      urgency: "",
+      budget_range: "",
+      referral_source: "",
+      metadata: {
+        submitted_at: new Date().toISOString(),
+        ip_hash: crypto
+          .createHash("sha256")
+          .update(request.headers.get("x-forwarded-for") || "unknown")
+          .digest("hex")
+          .slice(0, 16),
+        source: "contact-form",
+      },
     };
+
+    const hmacSecret = process.env.WEBHOOK_HMAC_SECRET || "";
+    const signature = crypto
+      .createHmac("sha256", hmacSecret)
+      .update(JSON.stringify(payload))
+      .digest("hex");
 
     const webhookResponse = await fetch(webhookUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Webhook-Signature": signature,
+      },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(10000),
     });
