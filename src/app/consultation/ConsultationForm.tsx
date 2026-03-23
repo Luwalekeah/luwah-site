@@ -154,6 +154,11 @@ export function ConsultationForm() {
         },
       });
       setStatus("sent");
+      setTimeout(() => {
+        setForm(INITIAL);
+        setStep(0);
+        setStatus("idle");
+      }, 5000);
     } catch {
       setStatus("error");
     }
