@@ -44,7 +44,7 @@ export function ProcessSection() {
             How it works
           </h2>
           <p
-            className="mx-auto max-w-md text-base"
+            className="mx-auto max-w-2xl text-base"
             style={{ color: "var(--color-text-secondary)" }}
           >
             Three steps from consultation to a fully automated workflow.

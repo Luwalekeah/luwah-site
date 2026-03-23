@@ -40,7 +40,7 @@ export function Footer() {
           Ready to automate?
         </h2>
         <p
-          className="mx-auto mb-8 max-w-md text-base"
+          className="mx-auto mb-8 max-w-2xl text-base"
           style={{ color: "var(--color-text-secondary)" }}
         >
           Book a free consultation and we&apos;ll map out what to automate

@@ -49,6 +49,7 @@ export function FAQSection() {
 
   return (
     <section
+      id="faq"
       className="py-24 md:py-32"
       style={{ backgroundColor: "var(--color-bg-secondary)" }}
       ref={ref}

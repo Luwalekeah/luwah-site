@@ -11,36 +11,42 @@ const SERVICES = [
     title: "Workflow Automation",
     description:
       "Transform repetitive manual tasks into automated workflows that run reliably in the background.",
+    showOnMobile: true,
   },
   {
     icon: Mail,
     title: "Lead Generation & Outreach",
     description:
       "Automate lead sourcing, email follow-ups, and engagement to grow your business effortlessly.",
+    showOnMobile: false,
   },
   {
     icon: BarChart3,
     title: "Data Processing & Insight",
     description:
       "Sync data across platforms and generate reports automatically — no more spreadsheet wrangling.",
+    showOnMobile: true,
   },
   {
     icon: Bot,
     title: "AI-Powered Chatbots",
     description:
       "Provide 24/7 customer support with intelligent chatbots trained on your business.",
+    showOnMobile: false,
   },
   {
     icon: Link2,
     title: "System Integrations",
     description:
       "Connect your CRM, e-commerce, accounting, and communication tools into unified workflows.",
+    showOnMobile: false,
   },
   {
     icon: Globe,
     title: "Website Design & Development",
     description:
       "Custom-built, fast-loading websites tailored to your brand — no templates, no monthly fees, full ownership.",
+    showOnMobile: true,
   },
 ];
 
@@ -78,7 +84,7 @@ export function ServicesSection() {
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : {}}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="card p-7"
+              className={`card p-7${!service.showOnMobile ? " hidden sm:block" : ""}`}
             >
               <service.icon
                 size={20}
@@ -102,7 +108,7 @@ export function ServicesSection() {
         </div>
 
         <div className="mt-10 text-center">
-          <Link href="/services" className="btn-secondary">
+          <Link href="/services" className="btn-secondary" scroll={true}>
             View All Services
           </Link>
         </div>

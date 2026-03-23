@@ -50,7 +50,7 @@ export function HeroSection() {
           </div>
 
           <h1
-            className="mx-auto mb-6 text-4xl font-bold md:text-7xl lg:text-8xl"
+            className="mx-auto mb-6 text-4xl font-bold whitespace-nowrap md:text-7xl lg:text-8xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
             Automation Consulting

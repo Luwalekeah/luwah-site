@@ -9,6 +9,22 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="pt-24">
+      <div className="mx-auto max-w-[var(--container-max)] px-6 pt-12">
+        <div
+          className="overflow-hidden rounded-2xl"
+          style={{ height: "300px", border: "1px solid var(--color-border)" }}
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover"
+          >
+            <source src="/videos/Animation A.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </div>
       <ContactSection />
     </div>
   );
