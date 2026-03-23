@@ -130,7 +130,7 @@ export function Footer() {
             )}
             <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
               Made by{" "}
-              <span style={{ color: "var(--color-copper)" }}>Daniel Cooke</span>
+              <Link href="/about" className="no-underline" style={{ color: "var(--color-copper)" }}>Daniel Cooke</Link>
             </p>
           </div>
         </div>
