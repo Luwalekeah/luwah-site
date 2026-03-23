@@ -4,14 +4,14 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { PROJECTS } from "@/data/projects";
+import type { Project } from "@/data/projects";
 
-export function WorkContent() {
+export function WorkContent({ projects }: { projects: Project[] }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
-  const featured = PROJECTS[0];
-  const rest = PROJECTS.slice(1);
+  const featured = projects[0];
+  const rest = projects.slice(1);
 
   return (
     <div className="pt-24" ref={ref}>

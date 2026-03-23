@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { PROJECTS, getProjectBySlug, getAllSlugs } from "@/data/projects";
+import { getProjectBySlug, getAllSlugs } from "@/data/projects";
+import { getSanityProjectBySlug, getSanityProjectSlugs } from "@/lib/sanity";
 import { CaseStudyContent } from "./CaseStudyContent";
 import type { Metadata } from "next";
 
@@ -7,13 +8,17 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
+  const sanitySlugs = await getSanityProjectSlugs();
+  const slugs = sanitySlugs ?? getAllSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = (await getSanityProjectBySlug(slug)) ?? getProjectBySlug(slug);
   if (!project) return {};
 
   return {
@@ -24,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = (await getSanityProjectBySlug(slug)) ?? getProjectBySlug(slug);
 
   if (!project) {
     notFound();

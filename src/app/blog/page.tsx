@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { POSTS } from "@/data/posts";
+import { getSanityPosts } from "@/lib/sanity";
 
 export const metadata: Metadata = {
   title: "The Automation Lab | Blog",
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
     "Practical articles on small business automation, workflows, and technology strategy from a hands-on consultant.",
 };
 
-export default function BlogPage() {
+export const revalidate = 60;
+
+export default async function BlogPage() {
+  const posts = (await getSanityPosts()) ?? POSTS;
+
   return (
     <div className="pt-24">
       <section className="py-24 md:py-32">
@@ -29,7 +34,7 @@ export default function BlogPage() {
           </p>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {POSTS.map((post) => (
+            {posts.map((post) => (
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
