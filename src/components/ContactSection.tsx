@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { SecureEmail } from "@/components/SecureEmail";
+import { Turnstile } from "@/components/Turnstile";
 
 export function ContactSection() {
   const ref = useRef(null);
@@ -15,16 +16,20 @@ export function ContactSection() {
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const handleToken = useCallback((token: string) => setTurnstileToken(token), []);
+  const handleExpire = useCallback(() => setTurnstileToken(null), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) return;
     setStatus("sending");
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstile_token: turnstileToken }),
       });
 
       if (!res.ok) throw new Error("Failed to send");
@@ -238,10 +243,13 @@ export function ContactSection() {
                   />
                 </div>
 
+                <Turnstile onToken={handleToken} onExpire={handleExpire} />
+
                 <button
                   type="submit"
-                  disabled={status === "sending"}
+                  disabled={status === "sending" || !turnstileToken}
                   className="btn-primary w-full"
+                  style={{ opacity: turnstileToken ? 1 : 0.5 }}
                 >
                   {status === "sending" ? "Sending..." : "Send Message"}
                 </button>

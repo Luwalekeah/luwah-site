@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { capturePartialLead } from "@/lib/capturePartialLead";
 import { submitIntakeForm } from "@/lib/intakePayload";
+import { Turnstile } from "@/components/Turnstile";
 
 const INDUSTRIES = [
   "Salon / Beauty / Barbershop",
@@ -96,6 +97,9 @@ export function ConsultationForm() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(INITIAL);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const handleToken = useCallback((token: string) => setTurnstileToken(token), []);
+  const handleExpire = useCallback(() => setTurnstileToken(null), []);
 
   const update = (fields: Partial<FormData>) => setForm((prev) => ({ ...prev, ...fields }));
 
@@ -117,7 +121,7 @@ export function ConsultationForm() {
   };
 
   const handleSubmit = async () => {
-    if (!canAdvance()) return;
+    if (!canAdvance() || !turnstileToken) return;
     setStatus("sending");
     try {
       await submitIntakeForm({
@@ -151,6 +155,7 @@ export function ConsultationForm() {
         metadata: {
           submitted_at: new Date().toISOString(),
           source: "website",
+          turnstile_token: turnstileToken,
         },
       });
       setStatus("sent");
@@ -446,10 +451,13 @@ export function ConsultationForm() {
                   Next <ArrowRight size={16} />
                 </button>
               ) : (
-                <button onClick={handleSubmit} disabled={!canAdvance() || status === "sending"} className="btn-primary flex items-center gap-2" type="button"
-                  style={{ opacity: canAdvance() ? 1 : 0.5 }}>
-                  {status === "sending" ? "Submitting..." : "Submit"} {status !== "sending" && <Check size={16} />}
-                </button>
+                <div className="flex items-center gap-4">
+                  <Turnstile onToken={handleToken} onExpire={handleExpire} />
+                  <button onClick={handleSubmit} disabled={!canAdvance() || !turnstileToken || status === "sending"} className="btn-primary flex items-center gap-2" type="button"
+                    style={{ opacity: canAdvance() && turnstileToken ? 1 : 0.5 }}>
+                    {status === "sending" ? "Submitting..." : "Submit"} {status !== "sending" && <Check size={16} />}
+                  </button>
+                </div>
               )}
             </div>
 

@@ -21,6 +21,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verify Cloudflare Turnstile
+    if (body.turnstile_token) {
+      const turnstileResponse = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            secret: process.env.CLOUDFLARE_TURNSTILE_SECRET || "",
+            response: body.turnstile_token,
+          }),
+        }
+      );
+      const turnstileResult = await turnstileResponse.json();
+      if (!turnstileResult.success) {
+        return NextResponse.json(
+          { error: "Bot verification failed" },
+          { status: 403 }
+        );
+      }
+    }
+
     // Forward to n8n webhook with HMAC signature
     const webhookUrl = process.env.N8N_WEBHOOK_URL;
     if (!webhookUrl) {
