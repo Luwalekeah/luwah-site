@@ -153,7 +153,7 @@ export function AboutContent() {
                     Founder &amp; Automation Specialist
                   </p>
                   <a
-                    href="https://daniel-cooke-cv.onrender.co"
+                    href="https://daniel-cooke-cv.onrender.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm font-semibold no-underline"
