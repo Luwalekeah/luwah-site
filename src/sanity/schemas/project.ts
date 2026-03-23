@@ -1,66 +1,62 @@
-/**
- * Sanity schema: Case Study / Project
- *
- * Import this into your Sanity Studio's schema index to register the "project" type.
- * Matches the Project interface in src/data/projects.ts.
- */
-const project = {
+import { defineField, defineType } from "sanity";
+
+export default defineType({
   name: "project",
   title: "Case Study",
   type: "document",
   fields: [
-    {
+    defineField({
       name: "title",
       title: "Title",
       type: "string",
-      validation: (Rule: { required: () => unknown }) => Rule.required(),
-    },
-    {
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: "slug",
       title: "Slug",
       type: "slug",
       options: { source: "title", maxLength: 96 },
-      validation: (Rule: { required: () => unknown }) => Rule.required(),
-    },
-    {
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: "category",
       title: "Category",
       type: "string",
-    },
-    {
+    }),
+    defineField({
       name: "description",
       title: "Short Description",
       type: "text",
       rows: 3,
-    },
-    {
+    }),
+    defineField({
       name: "image",
       title: "Cover Image",
       type: "string",
-      description: 'Local path (e.g. "/images/photo.jpg") or Sanity image URL',
-    },
-    {
+      description: 'Local path (e.g. "/images/photo.jpg") or external URL',
+    }),
+    defineField({
       name: "client",
       title: "Client",
       type: "string",
-    },
-    {
+    }),
+    defineField({
       name: "location",
       title: "Location",
       type: "string",
-    },
-    {
+    }),
+    defineField({
       name: "industry",
       title: "Industry",
       type: "string",
-    },
-    {
+    }),
+    defineField({
       name: "completed",
       title: "Completed",
       type: "string",
       description: 'Year or date string, e.g. "2026"',
-    },
-    {
+    }),
+    defineField({
       name: "metrics",
       title: "Metrics",
       type: "array",
@@ -68,40 +64,38 @@ const project = {
         {
           type: "object",
           fields: [
-            { name: "value", title: "Value", type: "string" },
-            { name: "label", title: "Label", type: "string" },
+            defineField({ name: "value", title: "Value", type: "string" }),
+            defineField({ name: "label", title: "Label", type: "string" }),
           ],
         },
       ],
-    },
-    {
+    }),
+    defineField({
       name: "overview",
       title: "Overview",
       type: "text",
       rows: 5,
-    },
-    {
+    }),
+    defineField({
       name: "challenge",
       title: "Challenges",
       type: "array",
       of: [{ type: "string" }],
-    },
-    {
+    }),
+    defineField({
       name: "solution",
       title: "Solutions",
       type: "array",
       of: [{ type: "string" }],
-    },
-    {
+    }),
+    defineField({
       name: "technologies",
       title: "Technologies",
       type: "array",
       of: [{ type: "string" }],
-    },
+    }),
   ],
   preview: {
-    select: { title: "title", subtitle: "client", media: "image" },
+    select: { title: "title", subtitle: "client" },
   },
-};
-
-export default project;
+});
