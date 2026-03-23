@@ -39,19 +39,19 @@ export const metadata: Metadata = {
       "Eliminate repetitive tasks and streamline your operations with custom business process automation services.",
     images: [
       {
-        url: "/images/og-image.jpg",
-        width: 2000,
-        height: 1400,
+        url: "/images/sharing-img-logo.jpg",
+        width: 869,
+        height: 976,
         alt: "Luwah Technologies",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Luwah Technologies | Small Business Automation",
     description:
       "Custom automation for small businesses. n8n, Python, AI-powered. Free consultation.",
-    images: ["/images/og-image.jpg"],
+    images: ["/images/sharing-img-logo.jpg"],
   },
   robots: { index: true, follow: true },
   icons: {
