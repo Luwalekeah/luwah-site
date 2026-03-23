@@ -64,11 +64,11 @@ const ANTI_BELIEFS = [
 export function AboutContent() {
   const storyRef = useRef(null);
   const valuesRef = useRef(null);
-  const teamRef = useRef(null);
+
   const antiRef = useRef(null);
   const storyInView = useInView(storyRef, { once: true, margin: "-80px" });
   const valuesInView = useInView(valuesRef, { once: true, margin: "-80px" });
-  const teamInView = useInView(teamRef, { once: true, margin: "-80px" });
+
   const antiInView = useInView(antiRef, { once: true, margin: "-80px" });
 
   return (
@@ -126,17 +126,42 @@ export function AboutContent() {
               transition={{ duration: 0.5, delay: 0.15 }}
               className="flex justify-center"
             >
-              <div
-                className="relative h-[400px] w-[320px] overflow-hidden rounded-xl md:h-[480px] md:w-[380px]"
-                style={{ border: "1px solid var(--color-border)" }}
-              >
-                <Image
-                  src="/images/daniel-about-img.jpg"
-                  alt="Daniel Cooke — Founder of Luwah Technologies"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 320px, 380px"
-                />
+              <div className="flex flex-col items-center gap-4">
+                <div
+                  className="relative h-[400px] w-[320px] overflow-hidden rounded-xl md:h-[480px] md:w-[380px]"
+                  style={{ border: "1px solid var(--color-border)" }}
+                >
+                  <Image
+                    src="/images/daniel-about-img.jpg"
+                    alt="Daniel Cooke — Founder of Luwah Technologies"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 320px, 380px"
+                  />
+                </div>
+                <div className="text-center">
+                  <h3
+                    className="text-lg font-semibold"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Daniel Cooke
+                  </h3>
+                  <p
+                    className="mb-2 text-sm"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    Founder &amp; Automation Specialist
+                  </p>
+                  <a
+                    href="https://daniel-cooke-cv.onrender.co"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-semibold no-underline"
+                    style={{ color: "var(--color-copper)" }}
+                  >
+                    View Resume →
+                  </a>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -189,60 +214,19 @@ export function AboutContent() {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="py-24 md:py-32" ref={teamRef}>
-        <div className="mx-auto max-w-[var(--container-max)] px-6">
-          <h2
-            className="mb-14 text-3xl font-bold md:text-4xl"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Meet our team
-          </h2>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={teamInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.4 }}
-            className="card inline-flex flex-col overflow-hidden"
-            style={{ maxWidth: 300 }}
-          >
-            <div className="relative h-[280px]">
-              <Image
-                src="/images/daniel-about-img.jpg"
-                alt="Daniel Cooke"
-                fill
-                className="object-cover"
-                sizes="300px"
-              />
-            </div>
-            <div className="flex items-center justify-between p-5">
-              <div>
-                <h3
-                  className="text-sm font-semibold"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Daniel Cooke
-                </h3>
-                <p
-                  className="text-xs"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  Founder &amp; Automation Specialist
-                </p>
-              </div>
-              <a
-                href="https://www.linkedin.com/in/danielcooke900"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-semibold no-underline"
-                style={{ color: "var(--color-copper)" }}
-                aria-label="LinkedIn"
-              >
-                in
-              </a>
-            </div>
-          </motion.div>
-        </div>
+      {/* Divider Image */}
+      <section className="relative h-[300px] md:h-[400px] overflow-hidden">
+        <Image
+          src="/images/rawpixel-desk-3139127_1920.jpg"
+          alt="Workspace desk"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to bottom, var(--color-bg-secondary), transparent 30%, transparent 70%, var(--color-bg-secondary))" }}
+        />
       </section>
 
       {/* Anti-Beliefs */}
@@ -259,7 +243,7 @@ export function AboutContent() {
             What we don&apos;t believe in
           </h2>
 
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {ANTI_BELIEFS.map((item, i) => (
               <motion.div
                 key={item.title}

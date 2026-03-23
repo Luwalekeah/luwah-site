@@ -247,7 +247,7 @@ export function ConsultationForm() {
               <div key={s} className="flex items-center gap-3">
                 <button
                   onClick={() => i < step && setStep(i)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-all"
                   style={{
                     backgroundColor: i <= step ? "var(--color-copper)" : "var(--color-bg-elevated)",
                     color: i <= step ? "#09090b" : "var(--color-text-muted)",
@@ -360,7 +360,7 @@ export function ConsultationForm() {
                       <div className="flex flex-wrap gap-2">
                         {HELP_AREAS.map((area) => (
                           <button key={area} type="button" onClick={() => toggleArray("helpAreas", area)}
-                            className="rounded-md px-3 py-1.5 text-xs transition-all"
+                            className="chip-button rounded-md px-4 py-2 text-sm transition-all"
                             style={chipStyle(form.helpAreas.includes(area))}>
                             {area}
                           </button>
@@ -372,7 +372,7 @@ export function ConsultationForm() {
                       <div className="flex flex-wrap gap-2">
                         {["Just exploring", "Planning for next quarter", "Need help now"].map((opt) => (
                           <button key={opt} type="button" onClick={() => update({ urgency: opt })}
-                            className="rounded-md px-4 py-2 text-sm transition-all"
+                            className="chip-button rounded-md px-4 py-2 text-sm transition-all"
                             style={chipStyle(form.urgency === opt)}>
                             {opt}
                           </button>
@@ -396,7 +396,7 @@ export function ConsultationForm() {
                       <div className="flex gap-2">
                         {["Email", "Phone", "Either works"].map((opt) => (
                           <button key={opt} type="button" onClick={() => update({ preferredContact: opt })}
-                            className="rounded-md px-4 py-2 text-sm transition-all"
+                            className="chip-button rounded-md px-4 py-2 text-sm transition-all"
                             style={chipStyle(form.preferredContact === opt)}>
                             {opt}
                           </button>
@@ -408,7 +408,7 @@ export function ConsultationForm() {
                       <div className="flex flex-wrap gap-2">
                         {["Weekday mornings", "Weekday afternoons", "Weekday evenings", "Weekends"].map((t) => (
                           <button key={t} type="button" onClick={() => toggleArray("availability", t)}
-                            className="rounded-md px-3 py-1.5 text-xs transition-all"
+                            className="chip-button rounded-md px-4 py-2 text-sm transition-all"
                             style={chipStyle(form.availability.includes(t))}>
                             {t}
                           </button>

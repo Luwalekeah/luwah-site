@@ -37,12 +37,21 @@ export const metadata: Metadata = {
     title: "Luwah Technologies | Small Business Automation",
     description:
       "Eliminate repetitive tasks and streamline your operations with custom business process automation services.",
+    images: [
+      {
+        url: "/images/logo-favicon.png",
+        width: 512,
+        height: 512,
+        alt: "Luwah Technologies",
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Luwah Technologies | Small Business Automation",
     description:
       "Custom automation for small businesses. n8n, Python, AI-powered. Free consultation.",
+    images: ["/images/logo-favicon.png"],
   },
   robots: { index: true, follow: true },
   icons: {
@@ -62,8 +71,11 @@ export default function RootLayout({
       className={`${montserrat.variable} ${openSans.variable} ${jetbrainsMono.variable}`}
     >
       <body>
+        <a href="#main-content" className="skip-to-content">
+          Skip to content
+        </a>
         <Header />
-        <main>{children}</main>
+        <main id="main-content">{children}</main>
         <Footer />
       </body>
     </html>

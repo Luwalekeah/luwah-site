@@ -120,9 +120,9 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   font-size: 0.9375rem;
   border-radius: var(--radius-xl);
-  border: none;
+  border: 2px solid transparent;
   cursor: pointer;
-  transition: background var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-base);
+  transition: background var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-base), border-color var(--transition-base);
   text-decoration: none;
 }
 
@@ -130,6 +130,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-copper-hover);
   transform: translateY(-1px);
   box-shadow: 0 8px 24px -4px rgba(212, 146, 79, 0.3);
+  border: 2px solid #4A90A4;
 }
 
 .btn-secondary {
@@ -151,7 +152,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: #4A90A4;
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -195,6 +196,78 @@ h1, h2, h3, h4, h5, h6 {
 
 .testimonial-track:hover {
   animation-play-state: paused;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+/* ============================================
+   NAV & FOOTER LINKS
+   ============================================ */
+
+.nav-link:hover {
+  color: var(--color-text-primary);
+}
+
+.nav-link:focus-visible {
+  color: var(--color-text-primary);
+  outline: 2px solid var(--color-copper);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.footer-link {
+  color: var(--color-text-secondary);
+}
+
+.footer-link:hover {
+  color: var(--color-text-primary);
+}
+
+.footer-link:focus-visible {
+  color: var(--color-text-primary);
+  outline: 2px solid var(--color-copper);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.mobile-nav-link:focus-visible {
+  outline: 2px solid var(--color-copper);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   CHIP BUTTONS (consultation form)
+   ============================================ */
+
+.chip-button:focus-visible {
+  outline: 2px solid var(--color-copper);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ============================================
+   SKIP TO CONTENT
+   ============================================ */
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 100;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-copper);
+  color: #0c0a14;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+
+.skip-to-content:focus {
+  top: 16px;
 }
 
 /* ============================================

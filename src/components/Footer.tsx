@@ -14,11 +14,12 @@ const FOOTER_LINKS = {
     { href: "/about", label: "About" },
     { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
-    { href: "/#faq", label: "FAQ" },
+    { href: "https://links.luwahtechnologies.com/@hub", label: "Links" },
   ],
   legal: [
     { href: "/terms", label: "Terms & Conditions" },
     { href: "/privacy", label: "Privacy Policy" },
+    { href: "/#faq", label: "FAQ" },
   ],
 };
 
@@ -80,7 +81,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 md:gap-16">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:gap-16">
 
           {(
             [
@@ -101,16 +102,8 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm no-underline transition-colors duration-200"
-                      style={{ color: "var(--color-text-secondary)" }}
-                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                        ((e.target as HTMLAnchorElement).style.color =
-                          "var(--color-text-primary)")
-                      }
-                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                        ((e.target as HTMLAnchorElement).style.color =
-                          "var(--color-text-secondary)")
-                      }
+                      {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="footer-link text-sm no-underline transition-colors duration-200"
                     >
                       {link.label}
                     </Link>

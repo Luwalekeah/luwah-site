@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SearchModal } from "./SearchModal";
 
 const NAV_LINKS = [
@@ -42,6 +43,27 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  // Close mobile menu on ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) setMobileOpen(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [mobileOpen]);
+
   return (
     <>
       <header
@@ -74,14 +96,8 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium no-underline transition-colors duration-200"
+                className="nav-link text-sm font-medium no-underline transition-colors duration-200"
                 style={{ color: "var(--color-text-secondary)" }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "var(--color-text-primary)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "var(--color-text-secondary)")
-                }
               >
                 {link.label}
               </Link>
@@ -98,14 +114,15 @@ export function Header() {
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="flex h-9 w-9 items-center justify-center lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-lg lg:hidden"
               style={{
                 color: "var(--color-text-primary)",
                 backgroundColor: "transparent",
                 border: "none",
                 cursor: "pointer",
               }}
-              aria-label="Menu"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -113,34 +130,52 @@ export function Header() {
         </div>
       </header>
 
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8"
-          style={{
-            backgroundColor: "rgba(12, 10, 20, 0.98)",
-            backdropFilter: "blur(20px)",
-          }}
-        >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="text-2xl font-semibold no-underline"
-              style={{ color: "var(--color-text-primary)" }}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link
-            href="/consultation"
-            onClick={() => setMobileOpen(false)}
-            className="btn-primary mt-4"
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-6"
+            style={{
+              backgroundColor: "rgba(12, 10, 20, 0.98)",
+              backdropFilter: "blur(20px)",
+            }}
           >
-            Get Started
-          </Link>
-        </div>
-      )}
+            {NAV_LINKS.map((link, i) => (
+              <motion.div
+                key={link.href}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.04 }}
+              >
+                <Link
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="mobile-nav-link text-xl font-semibold no-underline"
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
+            ))}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: NAV_LINKS.length * 0.04 }}
+            >
+              <Link
+                href="/consultation"
+                onClick={() => setMobileOpen(false)}
+                className="btn-primary mt-4"
+              >
+                Get Started
+              </Link>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
