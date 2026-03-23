@@ -1,24 +1,22 @@
-import { createClient } from "@sanity/client";
-import { createImageUrlBuilder } from "@sanity/image-url";
+import { createClient, type SanityClient } from "@sanity/client";
 import type { BlogPost } from "@/data/posts";
 import type { Project } from "@/data/projects";
 
 // ── Client ───────────────────────────────────────────────────────────
-export const sanityClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
-  apiVersion: "2024-01-01",
-  token: process.env.SANITY_API_TOKEN,
-  useCdn: process.env.NODE_ENV === "production",
-});
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
-// ── Image helper ─────────────────────────────────────────────────────
-const builder = createImageUrlBuilder(sanityClient);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function sanityImageUrl(source: any) {
-  return builder.image(source);
+let sanityClient: SanityClient | null = null;
+if (projectId) {
+  sanityClient = createClient({
+    projectId,
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
+    apiVersion: "2024-01-01",
+    token: process.env.SANITY_API_TOKEN,
+    useCdn: process.env.NODE_ENV === "production",
+  });
 }
+
+export { sanityClient };
 
 // ── GROQ queries ─────────────────────────────────────────────────────
 const postFields = `
@@ -52,6 +50,7 @@ const projectFields = `
 // ── Fetchers ─────────────────────────────────────────────────────────
 
 export async function getSanityPosts(): Promise<BlogPost[] | null> {
+  if (!sanityClient) return null;
   try {
     const posts = await sanityClient.fetch<BlogPost[]>(
       `*[_type == "post"] | order(date desc) { ${postFields} }`
@@ -64,6 +63,7 @@ export async function getSanityPosts(): Promise<BlogPost[] | null> {
 }
 
 export async function getSanityPostBySlug(slug: string): Promise<BlogPost | null> {
+  if (!sanityClient) return null;
   try {
     const post = await sanityClient.fetch<BlogPost | null>(
       `*[_type == "post" && slug.current == $slug][0] { ${postFields} }`,
@@ -77,6 +77,7 @@ export async function getSanityPostBySlug(slug: string): Promise<BlogPost | null
 }
 
 export async function getSanityPostSlugs(): Promise<string[] | null> {
+  if (!sanityClient) return null;
   try {
     const slugs = await sanityClient.fetch<string[]>(
       `*[_type == "post"].slug.current`
@@ -89,6 +90,7 @@ export async function getSanityPostSlugs(): Promise<string[] | null> {
 }
 
 export async function getSanityProjects(): Promise<Project[] | null> {
+  if (!sanityClient) return null;
   try {
     const projects = await sanityClient.fetch<Project[]>(
       `*[_type == "project"] | order(completed desc) { ${projectFields} }`
@@ -101,6 +103,7 @@ export async function getSanityProjects(): Promise<Project[] | null> {
 }
 
 export async function getSanityProjectBySlug(slug: string): Promise<Project | null> {
+  if (!sanityClient) return null;
   try {
     const project = await sanityClient.fetch<Project | null>(
       `*[_type == "project" && slug.current == $slug][0] { ${projectFields} }`,
@@ -114,6 +117,7 @@ export async function getSanityProjectBySlug(slug: string): Promise<Project | nu
 }
 
 export async function getSanityProjectSlugs(): Promise<string[] | null> {
+  if (!sanityClient) return null;
   try {
     const slugs = await sanityClient.fetch<string[]>(
       `*[_type == "project"].slug.current`
