@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     }
 
     const payload = {
+      form_type: "contact",
       submission_id: crypto.randomUUID(),
       lead_status: "complete",
       fullName: body.fullName,

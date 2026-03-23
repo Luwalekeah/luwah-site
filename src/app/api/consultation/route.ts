@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     // --- 3. Generate submission ID and flatten payload for n8n ---
     const submissionId = crypto.randomUUID();
     const payload = {
+      form_type: "consultation",
       submission_id: submissionId,
       lead_status: "complete",
       fullName: body.contact?.full_name || "",
