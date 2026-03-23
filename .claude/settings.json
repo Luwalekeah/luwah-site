@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh repo:*)",
-      "Bash(git push:*)",
-      "WebFetch(domain:www.lindy.ai)"
-    ]
-  }
-}
