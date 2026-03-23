@@ -129,10 +129,17 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Luwah Technologies LLC. All rights
             reserved.
           </p>
-          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-            Made by{" "}
-            <span style={{ color: "var(--color-copper)" }}>Daniel Cooke</span>
-          </p>
+          <div className="flex items-center gap-4">
+            {process.env.NEXT_PUBLIC_BUILD_ID && (
+              <p className="text-xs" style={{ color: "var(--color-text-muted)", opacity: 0.5 }}>
+                {process.env.NEXT_PUBLIC_BUILD_ID}
+              </p>
+            )}
+            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+              Made by{" "}
+              <span style={{ color: "var(--color-copper)" }}>Daniel Cooke</span>
+            </p>
+          </div>
         </div>
       </section>
     </footer>
