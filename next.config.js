@@ -6,6 +6,15 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.sanity.io" },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/hub",
+        destination: "https://links.luwahtechnologies.com/@hub",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
