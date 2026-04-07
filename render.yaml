@@ -30,3 +30,7 @@ services:
         sync: false
       - key: REVALIDATION_SECRET
         sync: false
+      - key: SENTRY_DSN
+        value: "https://712ae04cf13ec145d037ad08d546012a@o4511171159785472.ingest.us.sentry.io/4511177271803904"
+      - key: SENTRY_AUTH_TOKEN
+        sync: false
