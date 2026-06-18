@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
 const SERVICE_CATEGORIES = [
@@ -57,13 +56,6 @@ const SERVICE_CATEGORIES = [
       { name: "Liquor Store: Intelligent Loyalty System", description: "Advanced loyalty recognizing individual buying patterns with personalized offers based on category preferences." },
     ],
   },
-];
-
-const TIERS = [
-  { tier: "Quick Win", start: "$150–$300", description: "Email setup, basic reporting, single-platform automation" },
-  { tier: "Core Project", start: "$300–$750", description: "Reminder systems, dashboards, win-back campaigns" },
-  { tier: "Premium Integration", start: "$750–$1,500+", description: "Multi-system solutions, full analytics suites" },
-  { tier: "Ongoing Support", start: "$50–$200/mo", description: "Hosting, monitoring, and maintenance" },
 ];
 
 export function ServicesContent() {
@@ -194,51 +186,6 @@ export function ServicesContent() {
                 </AnimatePresence>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Investment Tiers */}
-      <section
-        id="pricing"
-        className="py-24 md:py-32"
-        style={{ backgroundColor: "var(--color-bg-secondary)" }}
-      >
-        <div className="mx-auto max-w-[var(--container-max)] px-6">
-          <h2
-            className="mb-12 text-3xl font-bold md:text-4xl"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Automation Project Levels
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-            {TIERS.map((t) => (
-              <div key={t.tier} className="card p-6">
-                <h3
-                  className="mb-1 text-xs font-semibold uppercase tracking-widest"
-                  style={{ color: "var(--color-copper)" }}
-                >
-                  {t.tier}
-                </h3>
-                <div
-                  className="mb-3 text-2xl font-bold"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {t.start}
-                </div>
-                <p
-                  className="text-xs leading-relaxed"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  {t.description}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-12 text-center">
-            <Link href="/consultation" className="btn-primary">
-              Get a Personalized Quote
-            </Link>
           </div>
         </div>
       </section>
