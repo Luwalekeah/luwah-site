@@ -105,7 +105,7 @@ export function PricingSection({
             className="mb-4 text-3xl font-bold md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Pricing
+            Automation Project Levels
           </h2>
           <p
             className="mx-auto max-w-md text-base"
