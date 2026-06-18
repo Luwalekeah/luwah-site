@@ -25,6 +25,8 @@ export default defineType({
         list: [
           "Domains & DNS",
           "Hosting & Servers",
+          "Networking",
+          "Hardware",
           "SEO & Marketing",
           "Security",
           "General",

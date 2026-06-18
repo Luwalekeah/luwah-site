@@ -1,9 +1,8 @@
+import Link from "next/link";
 import { HeroSection } from "@/components/HeroSection";
-import { ProcessSection } from "@/components/ProcessSection";
 import { ServicesSection } from "@/components/ServicesSection";
 import { PortfolioSection } from "@/components/PortfolioSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
-import { FAQSection } from "@/components/FAQSection";
 import { ImageDivider } from "@/components/ImageDivider";
 import { getSiteSettings } from "@/lib/sanity";
 
@@ -24,15 +23,30 @@ export default async function HomePage() {
           } : undefined
         }
       />
-      <ProcessSection />
+      <ServicesSection />
       <ImageDivider
         src="/images/pexels-brett-sayles-4520560.jpg"
         alt="Server infrastructure"
       />
-      <ServicesSection />
       <PortfolioSection />
       <TestimonialsSection />
-      <FAQSection />
+
+      {/* Closing CTA pointing to the dedicated pages */}
+      <section className="py-24 text-center">
+        <div className="mx-auto max-w-2xl px-6">
+          <h2 className="mb-4 text-3xl font-bold md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+            Ready to automate or build?
+          </h2>
+          <p className="mb-8 text-base" style={{ color: "var(--color-text-secondary)" }}>
+            Book a free consultation, or explore automation project levels and website builds.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/consultation" className="btn-primary">Book a Free Consultation</Link>
+            <Link href="/pricing" className="btn-secondary">Automation Project Levels</Link>
+            <Link href="/web-design" className="btn-secondary">Website Builds</Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

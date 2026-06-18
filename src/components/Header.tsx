@@ -3,21 +3,51 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SearchModal } from "./SearchModal";
 
-const NAV_LINKS = [
-  { href: "/#how-it-works", label: "Process" },
-  { href: "/services", label: "Services" },
-  { href: "/services#web-design", label: "Web Design" },
-  { href: "/work", label: "Work" },
-  { href: "/services#pricing", label: "Automation Project Levels" },
-  { href: "/reviews", label: "Reviews" },
-  { href: "/blog", label: "Blog" },
-  { href: "/learn", label: "Learn" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+interface NavItem {
+  href: string;
+  label: string;
+}
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV: NavGroup[] = [
+  {
+    label: "Services",
+    items: [
+      { href: "/services", label: "Automation" },
+      { href: "/web-design", label: "Web Design" },
+      { href: "/pricing", label: "Project Levels" },
+      { href: "/process", label: "Our Process" },
+    ],
+  },
+  {
+    label: "Work",
+    items: [
+      { href: "/work", label: "Case Studies" },
+      { href: "/reviews", label: "Reviews" },
+    ],
+  },
+  {
+    label: "Resources",
+    items: [
+      { href: "/blog", label: "Blog" },
+      { href: "/learn", label: "Education" },
+    ],
+  },
+  {
+    label: "Company",
+    items: [
+      { href: "/about", label: "About" },
+      { href: "/contact", label: "Contact" },
+      { href: "/faq", label: "FAQ" },
+    ],
+  },
 ];
 
 export function Header() {
@@ -25,19 +55,15 @@ export function Header() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null); // desktop dropdown
+  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null); // mobile accordion
 
   const handleScroll = useCallback(() => {
     const currentY = window.scrollY;
     setScrolled(currentY > 20);
-
-    if (currentY < 80) {
-      setVisible(true);
-    } else if (currentY > lastScrollY && currentY > 100) {
-      setVisible(false);
-    } else if (currentY < lastScrollY) {
-      setVisible(true);
-    }
-
+    if (currentY < 80) setVisible(true);
+    else if (currentY > lastScrollY && currentY > 100) setVisible(false);
+    else if (currentY < lastScrollY) setVisible(true);
     setLastScrollY(currentY);
   }, [lastScrollY]);
 
@@ -46,84 +72,85 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // Close mobile menu on ESC
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && mobileOpen) setMobileOpen(false);
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setMobileOpen(false); setOpenMenu(null); }
     };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [mobileOpen]);
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, []);
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${
-          visible ? "header-visible" : "header-hidden"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${visible ? "header-visible" : "header-hidden"}`}
         style={{
-          backgroundColor: scrolled ? "rgba(12, 10, 20, 0.7)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
-          borderBottom: scrolled
-            ? "1px solid var(--color-border)"
-            : "1px solid transparent",
+          backgroundColor: scrolled || openMenu ? "rgba(12, 10, 20, 0.85)" : "transparent",
+          backdropFilter: scrolled || openMenu ? "blur(20px)" : "none",
+          WebkitBackdropFilter: scrolled || openMenu ? "blur(20px)" : "none",
+          borderBottom: scrolled ? "1px solid var(--color-border)" : "1px solid transparent",
         }}
       >
         <div className="mx-auto flex max-w-[var(--container-max)] items-center justify-between px-6" style={{ height: "56px" }}>
           <Link href="/" className="no-underline">
-            <Image
-              src="/images/logo-navbar.png"
-              alt="Luwah Technologies"
-              width={280}
-              height={70}
-              priority
-              style={{ height: "36px", width: "auto" }}
-            />
+            <Image src="/images/logo-navbar.png" alt="Luwah Technologies" width={280} height={70} priority style={{ height: "36px", width: "auto" }} />
           </Link>
 
-          <nav className="hidden items-center gap-7 lg:flex">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="nav-link text-sm font-medium no-underline transition-colors duration-200"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                {link.label}
-              </Link>
+          {/* Desktop grouped nav */}
+          <nav className="hidden items-center gap-1 lg:flex" onMouseLeave={() => setOpenMenu(null)}>
+            {NAV.map((group) => (
+              <div key={group.label} className="relative" onMouseEnter={() => setOpenMenu(group.label)}>
+                <button
+                  className="nav-link flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200"
+                  style={{ color: "var(--color-text-secondary)", background: "none", border: "none", cursor: "pointer" }}
+                  onClick={() => setOpenMenu(openMenu === group.label ? null : group.label)}
+                  aria-expanded={openMenu === group.label}
+                >
+                  {group.label}
+                  <ChevronDown size={14} style={{ transform: openMenu === group.label ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                </button>
+                <AnimatePresence>
+                  {openMenu === group.label && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 top-full min-w-[200px] rounded-xl p-2"
+                      style={{ backgroundColor: "rgba(20, 17, 30, 0.98)", border: "1px solid var(--color-border)", backdropFilter: "blur(20px)" }}
+                    >
+                      {group.items.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpenMenu(null)}
+                          className="block rounded-lg px-3 py-2 text-sm no-underline transition-colors"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
             <SearchModal />
             <span className="hidden lg:block">
-              <Link href="/consultation" className="btn-primary">
-                Get Started
-              </Link>
+              <Link href="/consultation" className="btn-primary">Get Started</Link>
             </span>
-
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="flex h-10 w-10 items-center justify-center rounded-lg lg:hidden"
-              style={{
-                color: "var(--color-text-primary)",
-                backgroundColor: "transparent",
-                border: "none",
-                cursor: "pointer",
-              }}
+              style={{ color: "var(--color-text-primary)", background: "none", border: "none", cursor: "pointer" }}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
             >
@@ -133,6 +160,7 @@ export function Header() {
         </div>
       </header>
 
+      {/* Mobile accordion menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -140,42 +168,48 @@ export function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-6"
-            style={{
-              backgroundColor: "rgba(12, 10, 20, 0.98)",
-              backdropFilter: "blur(20px)",
-            }}
+            className="fixed inset-0 z-40 overflow-y-auto pt-20 pb-10 lg:hidden"
+            style={{ backgroundColor: "rgba(12, 10, 20, 0.98)", backdropFilter: "blur(20px)" }}
           >
-            {NAV_LINKS.map((link, i) => (
-              <motion.div
-                key={link.href}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: i * 0.04 }}
-              >
-                <Link
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="mobile-nav-link text-xl font-semibold no-underline"
-                  style={{ color: "var(--color-text-primary)" }}
-                >
-                  {link.label}
-                </Link>
-              </motion.div>
-            ))}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: NAV_LINKS.length * 0.04 }}
-            >
-              <Link
-                href="/consultation"
-                onClick={() => setMobileOpen(false)}
-                className="btn-primary mt-4"
-              >
+            <div className="mx-auto flex max-w-md flex-col gap-1 px-6">
+              {NAV.map((group) => {
+                const open = openMobileGroup === group.label;
+                return (
+                  <div key={group.label} className="border-b" style={{ borderColor: "var(--color-border)" }}>
+                    <button
+                      onClick={() => setOpenMobileGroup(open ? null : group.label)}
+                      className="flex w-full items-center justify-between py-4 text-left text-lg font-semibold"
+                      style={{ color: "var(--color-text-primary)", background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      {group.label}
+                      <ChevronDown size={18} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                    </button>
+                    <AnimatePresence>
+                      {open && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                          <div className="flex flex-col pb-3">
+                            {group.items.map((item) => (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setMobileOpen(false)}
+                                className="py-2 pl-4 text-base no-underline"
+                                style={{ color: "var(--color-text-secondary)" }}
+                              >
+                                {item.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+              <Link href="/consultation" onClick={() => setMobileOpen(false)} className="btn-primary mt-6 text-center">
                 Get Started
               </Link>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
