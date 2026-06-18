@@ -76,6 +76,32 @@ export default defineConfig({
                   .defaultOrdering([{ field: "submittedAt", direction: "desc" }])
               ),
             S.divider(),
+            // Reviews: pending need approval before they show on the site.
+            S.listItem()
+              .title("Reviews")
+              .child(
+                S.list()
+                  .title("Reviews")
+                  .items([
+                    S.listItem()
+                      .title("Pending approval")
+                      .child(
+                        S.documentList()
+                          .title("Pending approval")
+                          .filter('_type == "review" && approved != true')
+                          .defaultOrdering([{ field: "date", direction: "desc" }])
+                      ),
+                    S.listItem()
+                      .title("Approved")
+                      .child(
+                        S.documentList()
+                          .title("Approved")
+                          .filter('_type == "review" && approved == true')
+                          .defaultOrdering([{ field: "date", direction: "desc" }])
+                      ),
+                  ])
+              ),
+            S.divider(),
             // Singletons for editable content and the web services catalog.
             S.listItem()
               .title("Site Content")
