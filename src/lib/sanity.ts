@@ -13,6 +13,9 @@ if (projectId) {
     apiVersion: "2024-01-01",
     token: process.env.SANITY_API_TOKEN,
     useCdn: process.env.NODE_ENV === "production",
+    // Public site must never see drafts. This keeps unvetted AI blog drafts
+    // (and any other draft) off the live site until you Publish in Studio.
+    perspective: "published",
   });
 }
 
