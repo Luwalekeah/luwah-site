@@ -117,6 +117,7 @@ export default defineConfig({
               ),
             S.divider(),
             S.documentTypeListItem("post").title("Blog Posts"),
+            S.documentTypeListItem("guide").title("Learn Entries"),
             S.documentTypeListItem("project").title("Projects"),
           ]),
     }),

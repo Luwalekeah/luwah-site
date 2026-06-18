@@ -1,26 +1,47 @@
 version: 2
 updates:
-  # Application dependencies. Minor and patch updates are grouped to reduce PR
-  # noise. Major updates open individually so breaking changes get a real review.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     labels: ["dependencies"]
     groups:
-      production-minor-patch:
+      # The Sanity packages must move together. Grouping them (including majors)
+      # means the sanity + next-sanity + @sanity/* upgrade arrives as ONE PR you
+      # review deliberately, instead of several conflicting major PRs.
+      sanity:
+        patterns:
+          - "sanity"
+          - "@sanity/*"
+          - "next-sanity"
+          - "@portabletext/*"
+        update-types: ["minor", "patch", "major"]
+      # Everything else, minor and patch only, grouped to cut noise.
+      production:
         dependency-type: "production"
         update-types: ["minor", "patch"]
-      dev-minor-patch:
+        exclude-patterns: ["sanity", "@sanity/*", "next-sanity", "@portabletext/*"]
+      development:
         dependency-type: "development"
         update-types: ["minor", "patch"]
+    # Framework majors are breaking by nature. Hold them for a deliberate upgrade
+    # task. Dependabot still opens minor and patch PRs for these.
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
 
-  # Keep the GitHub Actions in our workflows current.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
     labels: ["ci"]
+    groups:
+      actions:
+        patterns: ["*"]

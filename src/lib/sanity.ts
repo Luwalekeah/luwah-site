@@ -170,3 +170,58 @@ export async function getSanityProjectSlugs(): Promise<string[] | null> {
     return null;
   }
 }
+
+// ── Learn entries (guides) ───────────────────────────────────────────
+export interface Guide {
+  title: string;
+  slug: string;
+  category: string;
+  summary?: string;
+  body?: string[];
+  order?: number;
+}
+
+const guideFields = `
+  "slug": slug.current,
+  title,
+  category,
+  summary,
+  body,
+  order
+`;
+
+export async function getGuides(): Promise<Guide[]> {
+  if (!sanityClient) return [];
+  try {
+    return await sanityClient.fetch<Guide[]>(
+      `*[_type == "guide"] | order(category asc, order asc) { ${guideFields} }`
+    );
+  } catch (err) {
+    console.error("Sanity fetch (guides) failed:", err);
+    return [];
+  }
+}
+
+export async function getGuideBySlug(slug: string): Promise<Guide | null> {
+  if (!sanityClient) return null;
+  try {
+    return await sanityClient.fetch<Guide | null>(
+      `*[_type == "guide" && slug.current == $slug][0] { ${guideFields} }`,
+      { slug }
+    );
+  } catch (err) {
+    console.error("Sanity fetch (guide) failed:", err);
+    return null;
+  }
+}
+
+export async function getGuideSlugs(): Promise<string[] | null> {
+  if (!sanityClient) return null;
+  try {
+    const slugs = await sanityClient.fetch<string[]>(`*[_type == "guide"].slug.current`);
+    return slugs.length > 0 ? slugs : null;
+  } catch (err) {
+    console.error("Sanity fetch (guide slugs) failed:", err);
+    return null;
+  }
+}

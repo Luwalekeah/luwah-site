@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getPostBySlug, getAllPostSlugs } from "@/data/posts";
 import { getSanityPostBySlug, getSanityPostSlugs } from "@/lib/sanity";
 import { BlogPostContent } from "./BlogPostContent";
+import { JsonLd } from "@/components/JsonLd";
+import { blogPostingSchema } from "@/lib/structuredData";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -35,5 +37,10 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
-  return <BlogPostContent post={post} />;
+  return (
+    <>
+      <JsonLd data={blogPostingSchema(post)} />
+      <BlogPostContent post={post} />
+    </>
+  );
 }

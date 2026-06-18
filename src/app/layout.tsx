@@ -3,6 +3,8 @@ import { Montserrat, Open_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
+import { organizationSchema } from "@/lib/structuredData";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -71,6 +73,7 @@ export default function RootLayout({
       className={`${montserrat.variable} ${openSans.variable} ${jetbrainsMono.variable}`}
     >
       <body>
+        <JsonLd data={organizationSchema} />
         <a href="#main-content" className="skip-to-content">
           Skip to content
         </a>

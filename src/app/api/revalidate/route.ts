@@ -38,6 +38,8 @@ function pathsForType(type: string, slug?: string): string[] {
     case "review":
       // Approving or editing a review changes the reviews page aggregate.
       return ["/reviews"];
+    case "guide":
+      return slug ? ["/learn", `/learn/${slug}`] : ["/learn"];
     default:
       return [];
   }

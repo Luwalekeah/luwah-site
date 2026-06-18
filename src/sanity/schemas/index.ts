@@ -6,6 +6,7 @@ import webCatalog from "./webCatalog";
 import webOrder from "./webOrder";
 import buildIntake from "./buildIntake";
 import review from "./review";
+import guide from "./guide";
 
 export const schemaTypes = [
   post,
@@ -16,4 +17,5 @@ export const schemaTypes = [
   webOrder,
   buildIntake,
   review,
+  guide,
 ];
