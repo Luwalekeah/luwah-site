@@ -23,12 +23,14 @@ export default defineType({
       type: "string",
       options: {
         list: [
+          "Web Design",
           "Domains & DNS",
           "Hosting & Servers",
           "Networking",
           "Hardware",
-          "SEO & Marketing",
           "Security",
+          "AI",
+          "SEO & Marketing",
           "General",
         ],
       },
