@@ -59,6 +59,7 @@ export default defineType({
           fields: [
             { name: "key", title: "Key (stable id)", type: "string", validation: (r) => r.required() },
             { name: "name", title: "Name", type: "string" },
+            { name: "description", title: "Short description (1-3 sentences)", type: "text", rows: 2 },
             { name: "oneTime", title: "One-time price (USD number)", type: "number" },
             { name: "oneTimeLabel", title: "One-time label", type: "string" },
             { name: "monthlyLabel", title: "Monthly label", type: "string" },

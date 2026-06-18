@@ -53,12 +53,19 @@ export function WebDesignSection({ catalog }: { catalog: WebCatalog }) {
         </h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {catalog.addons.map((a) => (
-            <div key={a.key} className="card flex items-center justify-between p-4">
-              <span className="text-sm">{a.name}</span>
-              <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-                {a.oneTimeLabel}
-                {a.monthlyLabel ? ` · ${a.monthlyLabel}` : ""}
-              </span>
+            <div key={a.key} className="card flex flex-col p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{a.name}</span>
+                <span className="shrink-0 pl-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  {a.oneTimeLabel}
+                  {a.monthlyLabel ? ` · ${a.monthlyLabel}` : ""}
+                </span>
+              </div>
+              {a.description && (
+                <p className="mt-1.5 text-xs leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                  {a.description}
+                </p>
+              )}
             </div>
           ))}
         </div>
