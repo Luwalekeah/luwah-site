@@ -209,7 +209,7 @@ export function ServicesContent() {
             className="mb-12 text-3xl font-bold md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Investment levels
+            Automation Project Levels
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
             {TIERS.map((t) => (

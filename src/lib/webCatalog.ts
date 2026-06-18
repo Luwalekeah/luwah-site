@@ -25,6 +25,7 @@ export interface WebAddon {
   monthlyLabel?: string;
   includedIn?: string[]; // tier keys that bundle this addon
   variable?: boolean; // priced per project/unit, excluded from the fixed total
+  description?: string; // 1-3 sentences shown behind an info toggle
 }
 
 export interface WebSupportPlan {
@@ -121,7 +122,7 @@ export const DEFAULT_CATALOG: WebCatalog = {
       priceLabel: "$3,000",
       pages: "Full Platform",
       summary: "Everything, plus payments and a CMS.",
-      includedAddons: ["stripe", "sanity-cms", "sentry", "resend", "multi-user"],
+      includedAddons: ["stripe", "sanity-cms", "sentry", "resend", "admin-account"],
       features: [
         "Everything in Tier 2",
         "Stripe payment integration",
@@ -133,20 +134,32 @@ export const DEFAULT_CATALOG: WebCatalog = {
     },
   ],
   addons: [
-    { key: "managed-hosting", name: "Managed hosting (Render)", oneTime: 0, oneTimeLabel: "No setup fee", monthlyLabel: "From $10/mo" },
-    { key: "spreadsheet-leads", name: "Spreadsheet lead capture", oneTime: 80, oneTimeLabel: "+$80 per sheet", variable: true },
-    { key: "local-seo", name: "Local SEO setup", oneTime: 0, oneTimeLabel: "Priced per project", variable: true },
-    { key: "stripe", name: "Stripe payments", oneTime: 300, oneTimeLabel: "+$300", monthlyLabel: "2.9% + $0.30/tx", includedIn: ["tier-3"] },
-    { key: "sanity-cms", name: "Sanity CMS / blog module", oneTime: 300, oneTimeLabel: "+$300", includedIn: ["tier-3"] },
-    { key: "sentry", name: "Sentry error tracking", oneTime: 100, oneTimeLabel: "+$100", includedIn: ["tier-3"] },
-    { key: "resend", name: "Resend transactional email", oneTime: 200, oneTimeLabel: "+$200", includedIn: ["tier-3"] },
-    { key: "slack", name: "Slack notifications", oneTime: 100, oneTimeLabel: "+$100" },
-    { key: "twilio", name: "Twilio SMS", oneTime: 200, oneTimeLabel: "+$200" },
-    { key: "multi-user", name: "Multi-user admin accounts", oneTime: 200, oneTimeLabel: "+$200", includedIn: ["tier-3"] },
+    { key: "managed-hosting", name: "Managed hosting (Render)", oneTime: 0, oneTimeLabel: "No setup fee", monthlyLabel: "From $10/mo",
+      description: "We host, monitor, and maintain your site so you do not have to. Includes uptime monitoring and updates, starting at $10 a month." },
+    { key: "spreadsheet-leads", name: "Spreadsheet lead capture", oneTime: 80, oneTimeLabel: "+$80 per sheet", variable: true,
+      description: "Form submissions flow automatically into a Google Sheet you can sort, filter, and share. Priced per sheet." },
+    { key: "local-seo", name: "Local SEO setup", oneTime: 0, oneTimeLabel: "Priced per project", variable: true,
+      description: "Setup that helps you show up in local Google searches and the map pack. Scoped and priced per project." },
+    { key: "stripe", name: "Stripe payments", oneTime: 300, oneTimeLabel: "+$300", monthlyLabel: "2.9% + $0.30/tx", includedIn: ["tier-3"],
+      description: "Accept card payments on your site through Stripe. The setup fee covers the integration; Stripe charges 2.9% plus $0.30 per transaction." },
+    { key: "sanity-cms", name: "Sanity CMS / blog module", oneTime: 300, oneTimeLabel: "+$300", includedIn: ["tier-3"],
+      description: "A simple dashboard to edit your site's text, images, and blog yourself, with no code." },
+    { key: "sentry", name: "Sentry error tracking", oneTime: 100, oneTimeLabel: "+$100", includedIn: ["tier-3"],
+      description: "Automatic error tracking so we catch and fix problems before they affect your customers." },
+    { key: "resend", name: "Resend transactional email", oneTime: 200, oneTimeLabel: "+$200", includedIn: ["tier-3"],
+      description: "Reliable automated emails like confirmations and receipts, sent from your own domain." },
+    { key: "slack", name: "Slack notifications", oneTime: 100, oneTimeLabel: "+$100",
+      description: "Get a Slack message the moment a lead, order, or form submission comes in." },
+    { key: "twilio", name: "Twilio SMS", oneTime: 200, oneTimeLabel: "+$200",
+      description: "Send and receive text messages, such as appointment reminders or SMS alerts to customers." },
+    { key: "admin-account", name: "Admin account", oneTime: 200, oneTimeLabel: "+$200", includedIn: ["tier-3"],
+      description: "A secure login to manage your site's content and data from one dashboard." },
+    { key: "client-portal", name: "Client portal", oneTime: 200, oneTimeLabel: "+$200",
+      description: "A private, login-protected area where your clients can view their info, bookings, documents, or order status." },
   ],
   supportPlans: [
     { key: "self-serve", name: "Self-Serve", priceLabel: "Free", includes: "Full documentation, best-effort email support, community forum." },
-    { key: "light", name: "Light Support", priceLabel: "$100/mo", includes: "Email support (24-hr response), 4 hrs/mo customization, monthly check-ins." },
+    { key: "light", name: "Light Support", priceLabel: "$50/mo", includes: "Email support (24-hr response), 2 hrs/mo customization, monthly check-ins." },
     { key: "standard", name: "Standard", priceLabel: "$300/mo", includes: "Priority email + Slack, 8 hrs/mo, bi-weekly check-ins, security patches." },
     { key: "premium", name: "Premium", priceLabel: "$750+/mo", includes: "24/7 on-call, dedicated Slack, 20 hrs/mo, weekly strategy calls, audits." },
     { key: "payg", name: "Pay as you go", priceLabel: "$100/hr", includes: "No subscription. Help on specific issues, 4 hour minimum." },
