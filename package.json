@@ -4,7 +4,7 @@
   "description": "Luwah Technologies LLC - Automation Consulting",
   "private": true,
   "engines": {
-    "node": "26.x"
+    "node": ">=24"
   },
   "scripts": {
     "dev": "next dev",
