@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { saveSubmission } from "@/lib/sanityWrite";
+import { verifyTurnstile } from "@/lib/verifyTurnstile";
+import { signPayload } from "@/lib/signPayload";
+import { rateLimit, clientKey } from "@/lib/rateLimit";
 
 /**
  * POST /api/consultation
@@ -14,6 +18,15 @@ import crypto from "crypto";
  */
 export async function POST(request: Request) {
   try {
+    // Throttle per IP before doing any work. 5 submissions per minute.
+    const limit = rateLimit(clientKey(request, "consultation"), 5, 60_000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+
     const body = await request.json();
 
     // --- 1. Server-side validation ---
@@ -32,26 +45,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- 2. Verify Cloudflare Turnstile ---
-    if (body.metadata?.turnstile_token) {
-      const turnstileResponse = await fetch(
-        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            secret: process.env.CLOUDFLARE_TURNSTILE_SECRET || "",
-            response: body.metadata.turnstile_token,
-          }),
-        }
+    // --- 2. Verify Cloudflare Turnstile (required, not optional) ---
+    if (!(await verifyTurnstile(body.metadata?.turnstile_token))) {
+      return NextResponse.json(
+        { error: "Bot verification failed" },
+        { status: 403 }
       );
-      const turnstileResult = await turnstileResponse.json();
-      if (!turnstileResult.success) {
-        return NextResponse.json(
-          { error: "Bot verification failed" },
-          { status: 403 }
-        );
-      }
     }
 
     // --- 3. Generate submission ID and flatten payload for n8n ---
@@ -85,34 +84,58 @@ export async function POST(request: Request) {
       },
     };
 
-    // HMAC signature for n8n to verify authenticity
-    const hmacSecret = process.env.WEBHOOK_HMAC_SECRET || "";
-    const signature = crypto
-      .createHmac("sha256", hmacSecret)
-      .update(JSON.stringify(payload))
-      .digest("hex");
+    // Store the lead in Sanity so it shows in the admin Studio, independent of
+    // n8n. The return value is the durable record of whether the lead is safe.
+    const stored = await saveSubmission({
+      formType: "consultation",
+      leadStatus: payload.lead_status,
+      submissionId: payload.submission_id,
+      fullName: payload.fullName,
+      email: payload.email,
+      phone: payload.phone,
+      preferredContact: payload.preferred_contact,
+      companyName: payload.companyName,
+      industry: payload.industry,
+      message: payload.message,
+      helpAreas: payload.help_areas,
+      urgency: payload.urgency,
+      referralSource: payload.referral_source,
+      pos: payload.pos,
+      booking: payload.booking,
+      accounting: payload.accounting,
+      submittedAt: payload.metadata.submitted_at,
+      ipHash: payload.metadata.ip_hash,
+      source: "consultation-form",
+    });
 
-    // --- 4. Forward to n8n webhook ---
+    // --- 4. Forward to n8n webhook (triggers the confirmation email) ---
     const webhookUrl = process.env.N8N_WEBHOOK_URL;
+    let delivered = false;
     if (webhookUrl) {
       try {
-        await fetch(webhookUrl, {
+        const res = await fetch(webhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Webhook-Signature": signature,
+            "X-Webhook-Signature": signPayload(payload),
           },
           body: JSON.stringify(payload),
           signal: AbortSignal.timeout(10000),
         });
+        delivered = res.ok;
       } catch (webhookError) {
-        // n8n is down — buffer the submission
-        // TODO: Write to Render-side buffer (Redis/KV) for retry
-        console.error("n8n webhook failed, buffering submission:", webhookError);
+        console.error("n8n webhook failed:", webhookError);
       }
     }
 
-    // Confirmation email is handled by n8n workflow (Resend → Confirm to User)
+    // Only report failure when the lead is lost in BOTH stores. If Sanity has
+    // it, the lead is safe even though the n8n email automation did not fire.
+    if (!stored && !delivered) {
+      return NextResponse.json(
+        { error: "Submission could not be processed. Please email hello@luwahtechnologies.com" },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({
       success: true,

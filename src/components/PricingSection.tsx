@@ -5,7 +5,21 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
-const TIERS = [
+interface Tier {
+  title: string;
+  description?: string;
+  price?: string;
+  unit?: string;
+  cta?: string;
+  ctaHref?: string;
+  features?: string[];
+  highlight?: boolean;
+}
+
+const DEFAULT_INTRO =
+  "Transparent per-project pricing. No surprises. Every project starts with a free consultation.";
+
+const TIERS: Tier[] = [
   {
     title: "Quick Win",
     description: "Email setup, basic reporting, single-platform automation.",
@@ -69,7 +83,17 @@ const TIERS = [
   },
 ];
 
-export function PricingSection() {
+export function PricingSection({
+  intro,
+  tiers,
+}: {
+  intro?: string;
+  tiers?: Tier[];
+}) {
+  // Fall back to built-in copy when Sanity fields are empty.
+  const introText = intro && intro.trim() ? intro : DEFAULT_INTRO;
+  const tierList = tiers && tiers.length > 0 ? tiers : TIERS;
+
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -87,12 +111,12 @@ export function PricingSection() {
             className="mx-auto max-w-md text-base"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Transparent per-project pricing. No surprises. Every project starts with a free consultation.
+            {introText}
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          {TIERS.map((tier, i) => (
+          {tierList.map((tier, i) => (
             <motion.div
               key={tier.title}
               initial={{ opacity: 0 }}
@@ -132,14 +156,14 @@ export function PricingSection() {
               </p>
 
               <Link
-                href={tier.ctaHref}
+                href={tier.ctaHref || "/consultation"}
                 className={tier.highlight ? "btn-primary mb-7" : "btn-secondary mb-7"}
               >
                 {tier.cta}
               </Link>
 
               <ul className="flex flex-col gap-3 border-t pt-6" style={{ borderColor: "var(--color-border)" }}>
-                {tier.features.map((feature) => (
+                {(tier.features || []).map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5">
                     <Check
                       size={15}

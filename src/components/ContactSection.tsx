@@ -6,7 +6,29 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import { SecureEmail } from "@/components/SecureEmail";
 import { Turnstile } from "@/components/Turnstile";
 
-export function ContactSection() {
+interface ContactInfo {
+  email?: string;
+  phone?: string;
+  location?: string;
+}
+
+// Built-in defaults used whenever the matching Sanity field is empty.
+const CONTACT_DEFAULTS = {
+  email: "hello@luwahtechnologies.com",
+  phone: "+1 (720) 421-7184",
+  location: "Aurora, CO 80017 United States",
+};
+
+export function ContactSection({ contact }: { contact?: ContactInfo }) {
+  const email =
+    contact?.email && contact.email.trim() ? contact.email : CONTACT_DEFAULTS.email;
+  const phone =
+    contact?.phone && contact.phone.trim() ? contact.phone : CONTACT_DEFAULTS.phone;
+  const location =
+    contact?.location && contact.location.trim() ? contact.location : CONTACT_DEFAULTS.location;
+  // Phone hrefs must contain digits and a leading + only.
+  const telHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
+
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [formData, setFormData] = useState({
@@ -83,7 +105,8 @@ export function ContactSection() {
               </h3>
               <SecureEmail
                 className="text-sm no-underline"
-                display="hello@luwahtechnologies.com"
+                display={email}
+                email={email}
               />
             </div>
 
@@ -100,11 +123,11 @@ export function ContactSection() {
                 Phone
               </h3>
               <a
-                href="tel:+17204217184"
+                href={telHref}
                 className="text-sm no-underline"
                 style={{ color: "var(--color-text-secondary)" }}
               >
-                +1 (720) 421-7184
+                {phone}
               </a>
             </div>
 
@@ -124,7 +147,7 @@ export function ContactSection() {
                 className="text-sm"
                 style={{ color: "var(--color-text-secondary)" }}
               >
-                Aurora, CO 80017 United States
+                {location}
               </p>
             </div>
           </motion.div>

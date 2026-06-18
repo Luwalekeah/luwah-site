@@ -116,6 +116,45 @@ export async function getSanityProjectBySlug(slug: string): Promise<Project | nu
   }
 }
 
+// ── Site settings (editable copy) ────────────────────────────────────
+export interface PricingTier {
+  title: string;
+  description?: string;
+  price?: string;
+  unit?: string;
+  cta?: string;
+  ctaHref?: string;
+  features?: string[];
+  highlight?: boolean;
+}
+
+export interface SiteSettings {
+  heroEyebrow?: string;
+  heroHeadline?: string;
+  heroSubhead?: string;
+  heroPrimaryCtaLabel?: string;
+  heroPrimaryCtaHref?: string;
+  heroSecondaryCtaLabel?: string;
+  heroSecondaryCtaHref?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  location?: string;
+  pricingIntro?: string;
+  pricingTiers?: PricingTier[];
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  if (!sanityClient) return null;
+  try {
+    return await sanityClient.fetch<SiteSettings | null>(
+      `*[_type == "siteSettings"][0]`
+    );
+  } catch (err) {
+    console.error("Sanity fetch (siteSettings) failed, using defaults:", err);
+    return null;
+  }
+}
+
 export async function getSanityProjectSlugs(): Promise<string[] | null> {
   if (!sanityClient) return null;
   try {

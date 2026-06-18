@@ -18,16 +18,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26" # Match local dev and the Render runtime (engines.node).
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
-        continue-on-error: true
-
+      # `next lint` was removed in Next 16. Type check is the gate.
       - name: Type check
         run: npx tsc --noEmit
 

@@ -30,14 +30,6 @@ const HELP_AREAS = [
   "Something else",
 ];
 
-const BUDGET_OPTIONS = [
-  "Quick Win ($150\u2013$300)",
-  "Core Project ($300\u2013$750)",
-  "Premium Integration ($750\u2013$1,500+)",
-  "Ongoing Support ($50\u2013$200/month)",
-  "Not sure yet \u2014 let\u2019s figure it out together",
-];
-
 const REFERRAL_SOURCES = [
   "Google Search",
   "Referral",
@@ -62,7 +54,6 @@ type FormData = {
   biggestChallenge: string;
   helpAreas: string[];
   urgency: string;
-  budgetRange: string;
   preferredContact: string;
   availability: string[];
   referralSource: string;
@@ -84,7 +75,6 @@ const INITIAL: FormData = {
   biggestChallenge: "",
   helpAreas: [],
   urgency: "",
-  budgetRange: "",
   preferredContact: "",
   availability: [],
   referralSource: "",
@@ -150,7 +140,6 @@ export function ConsultationForm() {
           help_areas: form.helpAreas,
           urgency: form.urgency,
         },
-        budget_range: form.budgetRange,
         referral_source: form.referralSource,
         metadata: {
           submitted_at: new Date().toISOString(),
@@ -384,13 +373,6 @@ export function ConsultationForm() {
 
                 {step === 3 && (
                   <div className="flex flex-col gap-5">
-                    <div>
-                      <label className="mb-1.5 block" style={labelStyle}>Budget range</label>
-                      <select value={form.budgetRange} onChange={(e) => update({ budgetRange: e.target.value })} className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={inputStyle}>
-                        <option value="">Select or skip</option>
-                        {BUDGET_OPTIONS.map((o) => (<option key={o} value={o}>{o}</option>))}
-                      </select>
-                    </div>
                     <div>
                       <label className="mb-2 block" style={labelStyle}>Preferred contact method *</label>
                       <div className="flex gap-2">

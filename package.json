@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Luwah Technologies LLC - Automation Consulting",
   "private": true,
+  "engines": {
+    "node": "26.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "NEXT_PUBLIC_BUILD_ID=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown') next build",
