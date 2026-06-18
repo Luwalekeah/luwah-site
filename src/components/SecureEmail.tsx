@@ -8,12 +8,16 @@
 export function SecureEmail({
   className = "",
   display = "hello[at]luwahtechnologies.com",
+  email = "hello@luwahtechnologies.com",
 }: {
   className?: string;
   display?: string;
+  email?: string;
 }) {
   const handleReveal = () => {
-    window.location.href = `mailto:hello${"@"}luwahtechnologies.com`;
+    // Assemble at click time so the raw mailto is not in the static markup.
+    const [user, domain] = email.split("@");
+    window.location.href = `mailto:${user}${"@"}${domain}`;
   };
 
   return (

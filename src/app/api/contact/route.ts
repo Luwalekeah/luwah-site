@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { saveSubmission } from "@/lib/sanityWrite";
+import { verifyTurnstile } from "@/lib/verifyTurnstile";
+import { signPayload } from "@/lib/signPayload";
+import { rateLimit, clientKey } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   try {
+    // Throttle per IP before doing any work. 5 submissions per minute.
+    const limit = rateLimit(clientKey(request, "contact"), 5, 60_000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+      );
+    }
+
     const body = await request.json();
 
     // Validate required fields
@@ -21,26 +34,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify Cloudflare Turnstile
-    if (body.turnstile_token) {
-      const turnstileResponse = await fetch(
-        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            secret: process.env.CLOUDFLARE_TURNSTILE_SECRET || "",
-            response: body.turnstile_token,
-          }),
-        }
+    // Verify Cloudflare Turnstile. Required, not optional: a missing token is a
+    // failed check, so a direct API call without the token cannot bypass it.
+    if (!(await verifyTurnstile(body.turnstile_token))) {
+      return NextResponse.json(
+        { error: "Bot verification failed" },
+        { status: 403 }
       );
-      const turnstileResult = await turnstileResponse.json();
-      if (!turnstileResult.success) {
-        return NextResponse.json(
-          { error: "Bot verification failed" },
-          { status: 403 }
-        );
-      }
     }
 
     // Forward to n8n webhook with HMAC signature
@@ -82,17 +82,27 @@ export async function POST(request: Request) {
       },
     };
 
-    const hmacSecret = process.env.WEBHOOK_HMAC_SECRET || "";
-    const signature = crypto
-      .createHmac("sha256", hmacSecret)
-      .update(JSON.stringify(payload))
-      .digest("hex");
+    // Store the lead in Sanity so it shows in the admin Studio, independent of
+    // n8n. Non-blocking: a Sanity failure is logged but does not drop the lead,
+    // which still forwards to n8n below.
+    await saveSubmission({
+      formType: "contact",
+      leadStatus: payload.lead_status,
+      submissionId: payload.submission_id,
+      fullName: payload.fullName,
+      email: payload.email,
+      companyName: payload.companyName,
+      message: payload.message,
+      submittedAt: payload.metadata.submitted_at,
+      ipHash: payload.metadata.ip_hash,
+      source: payload.metadata.source,
+    });
 
     const webhookResponse = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Webhook-Signature": signature,
+        "X-Webhook-Signature": signPayload(payload),
       },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(10000),

@@ -28,7 +28,7 @@ export interface IntakeFormPayload {
     help_areas: string[];
     urgency: string;
   };
-  budget_range: string;
+  budget_range?: string;
   referral_source: string;
   metadata: {
     submitted_at: string;

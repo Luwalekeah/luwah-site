@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { ContactSection } from "@/components/ContactSection";
+import { getSiteSettings } from "@/lib/sanity";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch with Luwah Technologies. We respond within 24 hours. Free consultation available. Aurora, Colorado.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await getSiteSettings();
   return (
     <div className="pt-24">
       <div className="mx-auto max-w-[var(--container-max)] px-6 pt-12">
@@ -25,7 +27,17 @@ export default function ContactPage() {
           </video>
         </div>
       </div>
-      <ContactSection />
+      <ContactSection
+        contact={
+          settings
+            ? {
+                email: settings.contactEmail,
+                phone: settings.contactPhone,
+                location: settings.location,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }

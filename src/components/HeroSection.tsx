@@ -3,7 +3,39 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export function HeroSection() {
+interface HeroContent {
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  primaryCtaLabel?: string;
+  primaryCtaHref?: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
+}
+
+// Built-in defaults. Used whenever the matching Sanity field is empty, so the
+// hero always renders even before any content is entered in Studio.
+const DEFAULTS = {
+  eyebrow: "Workflow automation for small businesses",
+  headline: "Automation Consulting",
+  subhead:
+    "We build automations across platforms — from cloud workflows to native scripts — so you can eliminate repetitive tasks, cut costs, and focus on work that matters.",
+  primaryCtaLabel: "Book a Free Consultation",
+  primaryCtaHref: "/consultation",
+  secondaryCtaLabel: "See Our Work",
+  secondaryCtaHref: "/work",
+};
+
+// Drop undefined/empty values so they do not override a non-empty default.
+function stripEmpty(obj?: HeroContent): Partial<HeroContent> {
+  if (!obj) return {};
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => typeof v === "string" && v.trim() !== "")
+  );
+}
+
+export function HeroSection({ content }: { content?: HeroContent }) {
+  const c = { ...DEFAULTS, ...stripEmpty(content) };
   return (
     <section className="relative flex min-h-[60vh] items-center overflow-hidden">
       {/* Video background */}
@@ -46,31 +78,29 @@ export function HeroSection() {
               className="h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: "var(--color-copper)" }}
             />
-            Workflow automation for small businesses
+            {c.eyebrow}
           </div>
 
           <h1
             className="mx-auto mb-6 text-4xl font-bold whitespace-nowrap md:text-7xl lg:text-8xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Automation Consulting
+            {c.headline}
           </h1>
 
           <p
             className="mx-auto mb-10 max-w-xl text-lg"
             style={{ color: "var(--color-text-secondary)", lineHeight: 1.7 }}
           >
-            We build automations across platforms — from cloud workflows to
-            native scripts — so you can eliminate repetitive tasks, cut costs,
-            and focus on work that matters.
+            {c.subhead}
           </p>
 
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/consultation" className="btn-primary">
-              Book a Free Consultation
+            <Link href={c.primaryCtaHref} className="btn-primary">
+              {c.primaryCtaLabel}
             </Link>
-            <Link href="/work" className="btn-secondary">
-              See Our Work
+            <Link href={c.secondaryCtaHref} className="btn-secondary">
+              {c.secondaryCtaLabel}
             </Link>
           </div>
         </motion.div>

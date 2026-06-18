@@ -24,10 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
-        continue-on-error: true
-
+      # `next lint` was removed in Next 16. Type check is the gate.
       - name: Type check
         run: npx tsc --noEmit
 

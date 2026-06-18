@@ -36,3 +36,6 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# internal offering source (pricing PDFs and generators), not for the public repo
+LT Website Offering/

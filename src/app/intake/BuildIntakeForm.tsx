@@ -1,0 +1,372 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { Turnstile } from "@/components/Turnstile";
+
+interface TierOption {
+  key: string;
+  name: string;
+  priceLabel: string;
+}
+
+const inputStyle: React.CSSProperties = {
+  backgroundColor: "var(--color-bg-input)",
+  border: "1px solid var(--color-border)",
+  color: "var(--color-text-primary)",
+  fontFamily: "var(--font-body)",
+};
+
+const PRIMARY_GOALS = [
+  "Capture leads / contact requests",
+  "Drive bookings or appointments",
+  "Sell products or services online",
+  "Establish credibility / brand presence",
+  "Educate or inform visitors",
+  "Other",
+];
+const LOGO_OPTIONS = ["Yes, I will send the file", "No, I need a logo designed", "In progress"];
+const PAGE_OPTIONS = [
+  "Home", "About / Our Story", "Services", "Pricing", "Portfolio / Gallery",
+  "Testimonials / Reviews", "Blog / Articles", "FAQ", "Contact", "Book / Schedule",
+  "Team / Staff", "Shop / Products",
+];
+const TESTIMONIAL_OPTIONS = ["Yes, I have them", "No, I will gather some", "No, I don't have any"];
+const FORM_OPTIONS = [
+  "General contact / inquiry form", "Lead capture form",
+  "Appointment / booking request form", "Newsletter signup", "Custom form",
+];
+const BOOKING_OPTIONS = ["Calendly", "Acuity Scheduling", "Square Appointments", "Mindbody", "Other", "None, I need one set up"];
+const PAYMENT_OPTIONS = ["Yes, I have a Stripe account", "Yes, I need help setting up payments", "No, not now"];
+const AUTOMATION_OPTIONS = [
+  "Free: Google Apps Script",
+  "Paid: n8n Cloud workflow engine",
+  "Self-Hosted n8n via Luwah ($500 setup + $12/mo)",
+  "Not sure, please advise",
+];
+const MEDIA_OPTIONS = [
+  "Professional photos of team", "Product or service photos", "Logo file",
+  "Brand guidelines document", "Video content", "None yet",
+];
+const DOMAIN_OPTIONS = ["Yes, I own it already", "No, I need help purchasing one", "Not sure what a domain is"];
+const HOSTING_OPTIONS = ["Managed hosting via Luwah", "I'll host it myself", "Not sure, please advise"];
+const TIMELINE_OPTIONS = ["As soon as possible", "Within 2 weeks", "Within a month", "Flexible: quality over speed"];
+
+const STEPS = ["Business", "Goals & Tier", "Brand", "Pages & Content", "Forms & Media", "Logistics"];
+
+type FormState = {
+  businessName: string; contactName: string; email: string; phone: string;
+  industry: string; location: string; tagline: string; mission: string; elevatorPitch: string;
+  primaryGoal: string; targetAudience: string; mainCta: string; problemSolved: string; tier: string;
+  hasLogo: string; brandColors: string; fonts: string; vibe: string; referenceSites: string; avoid: string;
+  pages: string[]; otherPages: string; homeSections: string; aboutContent: string; services: string;
+  hasTestimonials: string; testimonials: string; otherCopy: string;
+  forms: string[]; customForm: string; bookingTool: string; needsPayments: string;
+  automationPreference: string; otherTools: string; media: string[]; mediaNotes: string;
+  hasDomain: string; domainName: string; registrar: string; hostingPreference: string;
+  timeline: string; budget: string; anythingElse: string; printedName: string; agreed: boolean;
+};
+
+const EMPTY: FormState = {
+  businessName: "", contactName: "", email: "", phone: "", industry: "", location: "",
+  tagline: "", mission: "", elevatorPitch: "", primaryGoal: "", targetAudience: "", mainCta: "",
+  problemSolved: "", tier: "", hasLogo: "", brandColors: "", fonts: "", vibe: "", referenceSites: "",
+  avoid: "", pages: [], otherPages: "", homeSections: "", aboutContent: "", services: "",
+  hasTestimonials: "", testimonials: "", otherCopy: "", forms: [], customForm: "", bookingTool: "",
+  needsPayments: "", automationPreference: "", otherTools: "", media: [], mediaNotes: "",
+  hasDomain: "", domainName: "", registrar: "", hostingPreference: "", timeline: "", budget: "",
+  anythingElse: "", printedName: "", agreed: false,
+};
+
+export function BuildIntakeForm({ tiers }: { tiers: TierOption[] }) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState<FormState>(EMPTY);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  const handleToken = useCallback((t: string) => setTurnstileToken(t), []);
+  const handleExpire = useCallback(() => setTurnstileToken(null), []);
+  const update = (patch: Partial<FormState>) => setForm((f) => ({ ...f, ...patch }));
+  const toggle = (field: "pages" | "forms" | "media", value: string) =>
+    setForm((f) => ({
+      ...f,
+      [field]: f[field].includes(value) ? f[field].filter((v) => v !== value) : [...f[field], value],
+    }));
+
+  const tierOptions = [...tiers.map((t) => `${t.name} (${t.priceLabel})`), "Not sure, please advise"];
+
+  // Per-step gate on the required fields for that step.
+  const canAdvance = () => {
+    if (step === 0) return form.businessName.trim() && form.contactName.trim() && form.email.trim() && form.mission.trim();
+    if (step === 1) return form.primaryGoal && form.targetAudience.trim() && form.mainCta.trim();
+    if (step === 3) return form.pages.length > 0 && form.homeSections.trim() && form.aboutContent.trim() && form.services.trim();
+    if (step === 4) return form.forms.length > 0;
+    if (step === 5) return form.hasDomain && form.timeline && form.printedName.trim() && form.agreed;
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!canAdvance() || !turnstileToken || status === "sending") return;
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/build-intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, turnstile_token: turnstileToken }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  if (status === "sent") {
+    return (
+      <div className="card mx-auto max-w-xl p-10 text-center">
+        <h2 className="mb-3 text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+          Intake received
+        </h2>
+        <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+          Thank you. We have everything we need to begin. Expect a confirmation and next steps within
+          24 hours at the email you provided.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-2xl">
+      {/* Progress */}
+      <div className="mb-8 flex flex-wrap gap-2">
+        {STEPS.map((label, i) => (
+          <span
+            key={label}
+            className="rounded-full px-3 py-1 text-xs"
+            style={{
+              backgroundColor: i === step ? "var(--color-copper)" : "var(--color-bg-input)",
+              color: i === step ? "#fff" : "var(--color-text-muted)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            {i + 1}. {label}
+          </span>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-5">
+        {step === 0 && (
+          <>
+            <Field label="Business / brand name *" value={form.businessName} onChange={(v) => update({ businessName: v })} />
+            <Field label="Your name (owner / contact) *" value={form.contactName} onChange={(v) => update({ contactName: v })} />
+            <Field label="Email *" value={form.email} onChange={(v) => update({ email: v })} type="email" />
+            <Field label="Phone" value={form.phone} onChange={(v) => update({ phone: v })} />
+            <Field label="Industry / niche" value={form.industry} onChange={(v) => update({ industry: v })} />
+            <Field label="City / location" value={form.location} onChange={(v) => update({ location: v })} />
+            <Field label="Tagline or slogan" value={form.tagline} onChange={(v) => update({ tagline: v })} />
+            <Area label="Mission statement *" hint="What is your business here to do? Who do you serve and how?" value={form.mission} onChange={(v) => update({ mission: v })} />
+            <Area label="Elevator pitch" hint="What you do in 1-2 sentences." value={form.elevatorPitch} onChange={(v) => update({ elevatorPitch: v })} />
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <Radio label="Primary goal of this website *" options={PRIMARY_GOALS} value={form.primaryGoal} onChange={(v) => update({ primaryGoal: v })} />
+            <Area label="Target audience *" hint="Age, profession, pain points, location. Be specific." value={form.targetAudience} onChange={(v) => update({ targetAudience: v })} />
+            <Field label="Main call to action *" hint='e.g. "Book a free consultation"' value={form.mainCta} onChange={(v) => update({ mainCta: v })} />
+            <Area label="What problem does your site solve?" value={form.problemSolved} onChange={(v) => update({ problemSolved: v })} />
+            <Select label="Which tier are you considering?" options={tierOptions} value={form.tier} onChange={(v) => update({ tier: v })} />
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <Select label="Do you have an existing logo?" options={LOGO_OPTIONS} value={form.hasLogo} onChange={(v) => update({ hasLogo: v })} />
+            <Field label="Brand colors" hint="Hex codes or a description." value={form.brandColors} onChange={(v) => update({ brandColors: v })} />
+            <Field label="Font preferences" value={form.fonts} onChange={(v) => update({ fonts: v })} />
+            <Field label="Overall vibe and aesthetic" hint="Luxury, minimal, bold, warm, earthy, etc." value={form.vibe} onChange={(v) => update({ vibe: v })} />
+            <Area label="Reference websites you like" hint="URLs, one per line, with what you like." value={form.referenceSites} onChange={(v) => update({ referenceSites: v })} />
+            <Area label="Anything you do NOT want" value={form.avoid} onChange={(v) => update({ avoid: v })} />
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <CheckGroup label="Which pages do you need? *" options={PAGE_OPTIONS} selected={form.pages} onToggle={(v) => toggle("pages", v)} />
+            <Field label="Other pages not listed" value={form.otherPages} onChange={(v) => update({ otherPages: v })} />
+            <Area label="Home page sections *" hint="List each section and describe it." value={form.homeSections} onChange={(v) => update({ homeSections: v })} />
+            <Area label="About page content *" value={form.aboutContent} onChange={(v) => update({ aboutContent: v })} />
+            <Area label="Services (name, description, price) *" value={form.services} onChange={(v) => update({ services: v })} />
+            <Select label="Do you have testimonials?" options={TESTIMONIAL_OPTIONS} value={form.hasTestimonials} onChange={(v) => update({ hasTestimonials: v })} />
+            <Area label="Testimonials, awards, certifications" value={form.testimonials} onChange={(v) => update({ testimonials: v })} />
+            <Area label="Any other copy you have ready" value={form.otherCopy} onChange={(v) => update({ otherCopy: v })} />
+          </>
+        )}
+
+        {step === 4 && (
+          <>
+            <CheckGroup label="Which forms do you need? *" options={FORM_OPTIONS} selected={form.forms} onToggle={(v) => toggle("forms", v)} />
+            <Area label="Custom form details" value={form.customForm} onChange={(v) => update({ customForm: v })} />
+            <Select label="Booking / scheduling tool" options={BOOKING_OPTIONS} value={form.bookingTool} onChange={(v) => update({ bookingTool: v })} />
+            <Select label="Do you need to collect payments?" options={PAYMENT_OPTIONS} value={form.needsPayments} onChange={(v) => update({ needsPayments: v })} />
+            <Select label="Automation preference for lead tracking" options={AUTOMATION_OPTIONS} value={form.automationPreference} onChange={(v) => update({ automationPreference: v })} />
+            <Field label="Other tools to connect" hint="CRM, email marketing, POS, analytics." value={form.otherTools} onChange={(v) => update({ otherTools: v })} />
+            <CheckGroup label="What media do you have ready?" options={MEDIA_OPTIONS} selected={form.media} onToggle={(v) => toggle("media", v)} />
+            <Area label="Notes on media" value={form.mediaNotes} onChange={(v) => update({ mediaNotes: v })} />
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <Select label="Do you have a domain name? *" options={DOMAIN_OPTIONS} value={form.hasDomain} onChange={(v) => update({ hasDomain: v })} />
+            <Field label="Domain name (if you own one)" value={form.domainName} onChange={(v) => update({ domainName: v })} />
+            <Field label="Where is it registered?" value={form.registrar} onChange={(v) => update({ registrar: v })} />
+            <Select label="Hosting preference" options={HOSTING_OPTIONS} value={form.hostingPreference} onChange={(v) => update({ hostingPreference: v })} />
+            <Select label="When do you need the site live? *" options={TIMELINE_OPTIONS} value={form.timeline} onChange={(v) => update({ timeline: v })} />
+            <Select label="Budget range" options={tierOptions} value={form.budget} onChange={(v) => update({ budget: v })} />
+            <Area label="Anything else we should know?" value={form.anythingElse} onChange={(v) => update({ anythingElse: v })} />
+            <Field label="Printed name *" hint="Confirms the information is accurate." value={form.printedName} onChange={(v) => update({ printedName: v })} />
+            <label className="flex items-start gap-3" style={{ cursor: "pointer" }}>
+              <input type="checkbox" checked={form.agreed} onChange={(e) => update({ agreed: e.target.checked })}
+                className="mt-1 h-4 w-4" style={{ accentColor: "var(--color-copper)" }} />
+              <span className="text-xs leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+                I confirm the information provided is accurate and that I am authorized to commission
+                this website project. *
+              </span>
+            </label>
+            <Turnstile onToken={handleToken} onExpire={handleExpire} />
+          </>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <div className="mt-8 flex items-center justify-between">
+        {step > 0 ? (
+          <button onClick={() => setStep(step - 1)} className="btn-secondary flex items-center gap-2" type="button">
+            <ArrowLeft size={16} /> Back
+          </button>
+        ) : <div />}
+
+        {step < STEPS.length - 1 ? (
+          <button onClick={() => canAdvance() && setStep(step + 1)} disabled={!canAdvance()}
+            className="btn-primary flex items-center gap-2" type="button" style={{ opacity: canAdvance() ? 1 : 0.5 }}>
+            Next <ArrowRight size={16} />
+          </button>
+        ) : (
+          <button onClick={handleSubmit} disabled={!canAdvance() || !turnstileToken || status === "sending"}
+            className="btn-primary flex items-center gap-2" type="button"
+            style={{ opacity: canAdvance() && turnstileToken ? 1 : 0.5 }}>
+            {status === "sending" ? "Submitting..." : "Submit intake"} {status !== "sending" && <Check size={16} />}
+          </button>
+        )}
+      </div>
+
+      {status === "error" && (
+        <p className="mt-4 text-center text-sm" style={{ color: "#ef4444" }}>
+          Something went wrong. Please try again or email hello@luwahtechnologies.com
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Field primitives ──────────────────────────────────────────────
+function Label({ text, hint }: { text: string; hint?: string }) {
+  return (
+    <div className="mb-1.5">
+      <label className="block text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>{text}</label>
+      {hint && <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>{hint}</p>}
+    </div>
+  );
+}
+
+function Field({ label, hint, value, onChange, type = "text" }: {
+  label: string; hint?: string; value: string; onChange: (v: string) => void; type?: string;
+}) {
+  return (
+    <div>
+      <Label text={label} hint={hint} />
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={inputStyle} />
+    </div>
+  );
+}
+
+function Area({ label, hint, value, onChange }: {
+  label: string; hint?: string; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label text={label} hint={hint} />
+      <textarea rows={3} value={value} onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={inputStyle} />
+    </div>
+  );
+}
+
+function Select({ label, options, value, onChange }: {
+  label: string; options: string[]; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label text={label} />
+      <select value={value} onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg px-4 py-3 text-sm outline-none" style={inputStyle}>
+        <option value="">Select…</option>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function Radio({ label, options, value, onChange }: {
+  label: string; options: string[]; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label text={label} />
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => (
+          <button key={o} type="button" onClick={() => onChange(o)}
+            className="rounded-md px-3 py-2 text-sm transition-all"
+            style={{
+              border: "1px solid var(--color-border)",
+              backgroundColor: value === o ? "var(--color-copper)" : "var(--color-bg-input)",
+              color: value === o ? "#fff" : "var(--color-text-secondary)",
+            }}>
+            {o}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CheckGroup({ label, options, selected, onToggle }: {
+  label: string; options: string[]; selected: string[]; onToggle: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label text={label} />
+      <div className="grid gap-2 sm:grid-cols-2">
+        {options.map((o) => {
+          const on = selected.includes(o);
+          return (
+            <button key={o} type="button" onClick={() => onToggle(o)}
+              className="flex items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition-all"
+              style={{
+                border: `1px solid ${on ? "var(--color-copper-border)" : "var(--color-border)"}`,
+                backgroundColor: "var(--color-bg-input)",
+              }}>
+              <span className="flex h-4 w-4 items-center justify-center rounded"
+                style={{ border: "1px solid var(--color-border)", backgroundColor: on ? "var(--color-copper)" : "transparent" }}>
+                {on && <Check size={11} color="#fff" />}
+              </span>
+              {o}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
