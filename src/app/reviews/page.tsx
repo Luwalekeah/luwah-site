@@ -8,7 +8,9 @@ export const metadata: Metadata = {
     "See how clients rate Luwah Technologies on communication, expertise, timeliness, value, and overall experience.",
 };
 
-export const revalidate = 60;
+// Always fresh: an approval in Studio shows on the next page load, no caching
+// delay. The reviews page is low-traffic, so per-request fetching is fine.
+export const dynamic = "force-dynamic";
 
 export default async function ReviewsPage() {
   const reviews = await getApprovedReviews();
