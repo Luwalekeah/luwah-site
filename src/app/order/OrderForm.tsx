@@ -155,7 +155,7 @@ export function OrderForm({ catalog }: { catalog: WebCatalog }) {
               const open = expanded.includes(a.key);
               return (
                 <div key={a.key} className="card overflow-hidden"
-                  style={{ borderColor: checked ? "var(--color-copper-border)" : "var(--color-border)", opacity: isIncluded ? 0.75 : 1 }}>
+                  style={{ borderColor: checked ? "var(--color-copper-border)" : undefined, opacity: isIncluded ? 0.75 : 1 }}>
                   <div className="flex items-center justify-between p-4">
                     <button type="button" onClick={() => toggleAddon(a.key)} disabled={isIncluded}
                       className="flex flex-1 items-center gap-3 text-left"

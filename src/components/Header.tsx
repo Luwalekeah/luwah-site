@@ -145,7 +145,10 @@ export function Header() {
           <div className="flex items-center gap-3">
             <SearchModal />
             <span className="hidden lg:block">
-              <Link href="/consultation" className="btn-primary">Get Started</Link>
+              {/* Compact CTA: half the default btn-primary padding, same font size. */}
+              <Link href="/consultation" className="btn-primary" style={{ padding: "0.4rem 1rem" }}>
+                Get Started
+              </Link>
             </span>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
