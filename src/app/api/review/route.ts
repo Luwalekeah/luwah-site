@@ -4,6 +4,7 @@ import { writeClient } from "@/lib/sanityWrite";
 import { verifyTurnstile } from "@/lib/verifyTurnstile";
 import { signPayload } from "@/lib/signPayload";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
+import { notifyEmail } from "@/lib/notifyEmail";
 import { RATING_CATEGORIES, computeOverall, type Ratings } from "@/lib/reviews";
 
 /**
@@ -76,6 +77,14 @@ export async function POST(request: Request) {
       } catch (err) {
         console.error("Failed to store review:", err);
       }
+    }
+
+    if (stored) {
+      await notifyEmail(`New review: ${String(body.reviewerName).slice(0, 200)} (${overall}/5)`, [
+        body.company || body.role ? `${[body.role, body.company].filter(Boolean).join(", ")}` : "",
+        `"${String(body.quote).slice(0, 500)}"`,
+        "Pending approval. Approve it in Studio under Reviews to show it on the site.",
+      ].filter(Boolean));
     }
 
     const webhookUrl = process.env.N8N_WEB_WEBHOOK_URL;

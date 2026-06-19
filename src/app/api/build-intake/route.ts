@@ -4,6 +4,7 @@ import { writeClient } from "@/lib/sanityWrite";
 import { verifyTurnstile } from "@/lib/verifyTurnstile";
 import { signPayload } from "@/lib/signPayload";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
+import { notifyEmail } from "@/lib/notifyEmail";
 
 // Whitelist of accepted string fields, mapped straight onto the buildIntake doc.
 const STRING_FIELDS = [
@@ -85,6 +86,17 @@ export async function POST(request: Request) {
       } catch (err) {
         console.error("Failed to store build intake:", err);
       }
+    }
+
+    if (stored) {
+      await notifyEmail(`New website build intake: ${cleanString(body.businessName)}`, [
+        `Contact: ${cleanString(body.contactName)} (${cleanString(body.email)})`,
+        body.phone ? `Phone: ${cleanString(body.phone)}` : "",
+        body.tier ? `Tier considering: ${cleanString(body.tier)}` : "",
+        body.timeline ? `Timeline: ${cleanString(body.timeline)}` : "",
+        body.budget ? `Budget: ${cleanString(body.budget)}` : "",
+        "Open Studio to review the full intake under Build Intakes.",
+      ].filter(Boolean));
     }
 
     const webhookUrl = process.env.N8N_WEB_WEBHOOK_URL;

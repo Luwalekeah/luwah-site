@@ -21,6 +21,8 @@ const REQUIRED: Record<string, string> = {
 const OPTIONAL: Record<string, string> = {
   NEXT_PUBLIC_N8N_PARTIAL_WEBHOOK_URL: "forwarding partial leads to n8n",
   N8N_WEB_WEBHOOK_URL: "forwarding web orders and build intakes to n8n",
+  RESEND_API_KEY: "emailing you when an intake or review is submitted",
+  NOTIFY_EMAIL_TO: "recipient for submission emails (defaults to hello@luwahtechnologies.com)",
 };
 
 export function checkEnv() {
