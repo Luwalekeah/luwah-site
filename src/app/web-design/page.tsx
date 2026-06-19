@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     "Fixed-price websites from $300. Realtor landing pages, marketing sites, booking systems, and full platforms. Build, deploy, and 30 days of support included.",
 };
 
+export const revalidate = 60;
+
 export default async function WebDesignPage() {
   const catalog = await getWebCatalog();
   return (

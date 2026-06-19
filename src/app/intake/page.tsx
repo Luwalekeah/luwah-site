@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     "Tell us about your business, brand, pages, and content so we can build your website. Luwah Technologies intake form.",
 };
 
+export const revalidate = 60;
+
 export default async function IntakePage() {
   const catalog = await getWebCatalog();
   const tiers = catalog.tiers.map((t) => ({ key: t.key, name: t.name, priceLabel: t.priceLabel }));

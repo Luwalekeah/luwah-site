@@ -6,6 +6,8 @@ import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { ImageDivider } from "@/components/ImageDivider";
 import { getSiteSettings } from "@/lib/sanity";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const settings = await getSiteSettings();
   return (

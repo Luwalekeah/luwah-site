@@ -26,11 +26,11 @@ function safeEqual(a: string, b: string): boolean {
 function pathsForType(type: string, slug?: string): string[] {
   switch (type) {
     case "siteSettings":
-      return ["/", "/contact", "/services"];
+      return ["/", "/contact", "/services", "/pricing"];
     case "webCatalog":
-      // The catalog drives the services section, the order form, and the
-      // intake tier list. Refresh all three when prices change.
-      return ["/services", "/order", "/intake"];
+      // The catalog drives the web-design page, the order form, and the
+      // intake tier list. Refresh all when prices change.
+      return ["/web-design", "/order", "/intake"];
     case "post":
       return slug ? ["/blog", `/blog/${slug}`] : ["/blog"];
     case "project":

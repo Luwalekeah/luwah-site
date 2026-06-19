@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     "Pick a website tier and add-ons, see your price, and request a quote. Fixed pricing from $300. Luwah Technologies.",
 };
 
+export const revalidate = 60;
+
 export default async function OrderPage() {
   const catalog = await getWebCatalog();
   return (
