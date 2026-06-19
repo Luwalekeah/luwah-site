@@ -69,7 +69,9 @@ const reviewFields = `
 export async function getApprovedReviews(): Promise<Review[]> {
   if (!sanityClient) return [];
   try {
-    return await sanityClient.fetch<Review[]>(
+    // Bypass the Sanity CDN cache so a freshly approved review shows within
+    // seconds rather than waiting on the CDN's ~60s cache window.
+    return await sanityClient.withConfig({ useCdn: false }).fetch<Review[]>(
       `*[_type == "review" && approved == true] | order(coalesce(featured, false) desc, date desc) { ${reviewFields} }`
     );
   } catch (err) {
