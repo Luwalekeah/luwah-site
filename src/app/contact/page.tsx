@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Get in touch with Luwah Technologies. We respond within 24 hours. Free consultation available. Aurora, Colorado.",
 };
 
+export const revalidate = 60;
+
 export default async function ContactPage() {
   const settings = await getSiteSettings();
   return (

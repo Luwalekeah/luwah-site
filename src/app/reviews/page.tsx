@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     "See how clients rate Luwah Technologies on communication, expertise, timeliness, value, and overall experience.",
 };
 
+export const revalidate = 60;
+
 export default async function ReviewsPage() {
   const reviews = await getApprovedReviews();
   return (
