@@ -80,11 +80,22 @@ export async function POST(request: Request) {
     }
 
     if (stored) {
-      await notifyEmail(`New review: ${String(body.reviewerName).slice(0, 200)} (${overall}/5)`, [
-        body.company || body.role ? `${[body.role, body.company].filter(Boolean).join(", ")}` : "",
-        `"${String(body.quote).slice(0, 500)}"`,
-        "Pending approval. Approve it in Studio under Reviews to show it on the site.",
-      ].filter(Boolean));
+      const name = String(body.reviewerName).slice(0, 200);
+      await notifyEmail({
+        subject: `New Luwah Technologies Review from ${name}`,
+        heading: `${name} left a ${overall}/5 review`,
+        badge: "Action Needed",
+        rows: [
+          { label: "Reviewer", value: name },
+          { label: "Company", value: body.company ? String(body.company).slice(0, 200) : "" },
+          { label: "Role", value: body.role ? String(body.role).slice(0, 200) : "" },
+          { label: "Rating", value: `${overall} / 5` },
+        ],
+        quote: String(body.quote).slice(0, 1000),
+        note: "Pending approval. Approve it in Studio under Reviews to show it on the site.",
+        ctaUrl: "https://luwahtechnologies.com/studio/structure/reviews;pendingApproval",
+        ctaLabel: "Approve in Studio",
+      });
     }
 
     const webhookUrl = process.env.N8N_WEB_WEBHOOK_URL;
