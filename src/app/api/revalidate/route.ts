@@ -36,8 +36,9 @@ function pathsForType(type: string, slug?: string): string[] {
     case "project":
       return slug ? ["/work", `/work/${slug}`] : ["/work"];
     case "review":
-      // Approving or editing a review changes the reviews page aggregate.
-      return ["/reviews"];
+      // Approving or editing a review changes the reviews page and the
+      // homepage testimonials marquee.
+      return ["/reviews", "/"];
     case "guide":
       return slug ? ["/learn", `/learn/${slug}`] : ["/learn"];
     default:

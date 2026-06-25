@@ -1,40 +1,21 @@
 "use client";
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "Three subscriptions canceled. $480/year back in my pocket. And the peace of mind that my family photos aren\u2019t training someone\u2019s AI model.",
-    name: "Daniel C",
-    title: "Founder, Luwah Technologies LLC",
-  },
-  {
-    quote:
-      "What used to take a full day now takes 15 minutes. Leads come pre-enriched with emails, phone numbers, and owner names\u2014ready to contact.",
-    name: "Musu C",
-    title: "Owner, True Grace Home Care",
-  },
-  {
-    quote:
-      "From zero web presence to fully branded landing page in a weekend. No coding required. No monthly fees. No compromise on professionalism.",
-    name: "Daniel C.",
-    title: "Founder, Luwah Technologies LLC",
-  },
-  {
-    quote:
-      "Members get notified every single day\u2014whether the organizer is at their desk, on vacation, or sound asleep.",
-    name: "Yameh O",
-    title: "Communications Manager, Chess Ring",
-  },
-  {
-    quote:
-      "Upload a Word doc, automation builds the entire project board\u2014tasks, assignments, tags, everything. Hours of setup reduced to seconds.",
-    name: "Daniel C",
-    title: "Founder, Luwah Technologies LLC",
-  },
-];
+export interface Testimonial {
+  quote: string;
+  name: string;
+  title: string;
+}
 
-export function TestimonialsSection() {
-  const items = [...TESTIMONIALS, ...TESTIMONIALS];
+export function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
+  // Nothing approved yet: hide the section rather than show an empty marquee.
+  if (!testimonials.length) return null;
+
+  // Repeat to a minimum count, then duplicate once for a seamless loop.
+  const base = Array.from(
+    { length: Math.ceil(6 / testimonials.length) },
+    () => testimonials
+  ).flat();
+  const items = [...base, ...base];
 
   return (
     <section
