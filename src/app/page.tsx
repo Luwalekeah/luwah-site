@@ -5,11 +5,19 @@ import { PortfolioSection } from "@/components/PortfolioSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { ImageDivider } from "@/components/ImageDivider";
 import { getSiteSettings } from "@/lib/sanity";
+import { getApprovedReviews } from "@/lib/reviews";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const settings = await getSiteSettings();
+  const [settings, reviews] = await Promise.all([getSiteSettings(), getApprovedReviews()]);
+
+  // Top 5 approved reviews drive the "What our clients say" marquee.
+  const testimonials = reviews.slice(0, 5).map((r) => ({
+    quote: r.quote,
+    name: r.reviewerName,
+    title: [r.role, r.company].filter(Boolean).join(", "),
+  }));
   return (
     <>
       <HeroSection
@@ -31,7 +39,7 @@ export default async function HomePage() {
         alt="Server infrastructure"
       />
       <PortfolioSection />
-      <TestimonialsSection />
+      <TestimonialsSection testimonials={testimonials} />
 
       {/* Closing CTA pointing to the dedicated pages */}
       <section className="py-24 text-center">
