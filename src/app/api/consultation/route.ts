@@ -4,6 +4,7 @@ import { saveSubmission } from "@/lib/sanityWrite";
 import { verifyTurnstile } from "@/lib/verifyTurnstile";
 import { signPayload } from "@/lib/signPayload";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
+import { notifyEmail } from "@/lib/notifyEmail";
 
 /**
  * POST /api/consultation
@@ -107,6 +108,27 @@ export async function POST(request: Request) {
       ipHash: payload.metadata.ip_hash,
       source: "consultation-form",
     });
+
+    if (stored) {
+      await notifyEmail({
+        subject: `New Luwah Technologies Consultation Request from ${payload.fullName}`,
+        heading: `New consultation request from ${payload.fullName}`,
+        badge: "New Lead",
+        rows: [
+          { label: "Name", value: payload.fullName },
+          { label: "Email", value: payload.email },
+          { label: "Phone", value: payload.phone },
+          { label: "Company", value: payload.companyName },
+          { label: "Industry", value: payload.industry },
+          { label: "Urgency", value: payload.urgency },
+          { label: "Help areas", value: (payload.help_areas || []).join(", ") },
+        ],
+        quote: payload.message,
+        note: "Logged in Studio under Submissions, Consultations.",
+        ctaUrl: "https://luwahtechnologies.com/studio/structure/submissions;consultations",
+        ctaLabel: "View in Studio",
+      });
+    }
 
     // --- 4. Forward to n8n webhook (triggers the confirmation email) ---
     const webhookUrl = process.env.N8N_WEBHOOK_URL;

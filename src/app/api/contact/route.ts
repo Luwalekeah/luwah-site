@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { saveSubmission } from "@/lib/sanityWrite";
 import { verifyTurnstile } from "@/lib/verifyTurnstile";
 import { signPayload } from "@/lib/signPayload";
+import { notifyEmail } from "@/lib/notifyEmail";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
@@ -96,6 +97,21 @@ export async function POST(request: Request) {
       submittedAt: payload.metadata.submitted_at,
       ipHash: payload.metadata.ip_hash,
       source: payload.metadata.source,
+    });
+
+    await notifyEmail({
+      subject: `New Luwah Technologies Contact from ${payload.fullName}`,
+      heading: `New contact message from ${payload.fullName}`,
+      badge: "New Message",
+      rows: [
+        { label: "Name", value: payload.fullName },
+        { label: "Email", value: payload.email },
+        { label: "Company", value: payload.companyName },
+      ],
+      quote: payload.message,
+      note: "Logged in Studio under Submissions, Contact Messages.",
+      ctaUrl: "https://luwahtechnologies.com/studio/structure/submissions;contactMessages",
+      ctaLabel: "View in Studio",
     });
 
     const webhookResponse = await fetch(webhookUrl, {
