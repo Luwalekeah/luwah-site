@@ -68,6 +68,7 @@ export default defineConfig({
                   .defaultOrdering([{ field: "submittedAt", direction: "desc" }])
               ),
             S.listItem()
+              .id("buildIntakes")
               .title("Build Intakes")
               .child(
                 S.documentList()
@@ -78,12 +79,14 @@ export default defineConfig({
             S.divider(),
             // Reviews: pending need approval before they show on the site.
             S.listItem()
+              .id("reviews")
               .title("Reviews")
               .child(
                 S.list()
                   .title("Reviews")
                   .items([
                     S.listItem()
+                      .id("pendingApproval")
                       .title("Pending approval")
                       .child(
                         S.documentList()
@@ -92,6 +95,7 @@ export default defineConfig({
                           .defaultOrdering([{ field: "date", direction: "desc" }])
                       ),
                     S.listItem()
+                      .id("approved")
                       .title("Approved")
                       .child(
                         S.documentList()

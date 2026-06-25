@@ -89,14 +89,24 @@ export async function POST(request: Request) {
     }
 
     if (stored) {
-      await notifyEmail(`New website build intake: ${cleanString(body.businessName)}`, [
-        `Contact: ${cleanString(body.contactName)} (${cleanString(body.email)})`,
-        body.phone ? `Phone: ${cleanString(body.phone)}` : "",
-        body.tier ? `Tier considering: ${cleanString(body.tier)}` : "",
-        body.timeline ? `Timeline: ${cleanString(body.timeline)}` : "",
-        body.budget ? `Budget: ${cleanString(body.budget)}` : "",
-        "Open Studio to review the full intake under Build Intakes.",
-      ].filter(Boolean));
+      const business = cleanString(body.businessName);
+      await notifyEmail({
+        subject: `New Luwah Technologies Build Intake from ${business}`,
+        heading: `New website build intake from ${business}`,
+        badge: "New Lead",
+        rows: [
+          { label: "Business", value: business },
+          { label: "Contact", value: cleanString(body.contactName) },
+          { label: "Email", value: cleanString(body.email) },
+          { label: "Phone", value: cleanString(body.phone) },
+          { label: "Tier", value: cleanString(body.tier) },
+          { label: "Timeline", value: cleanString(body.timeline) },
+          { label: "Budget", value: cleanString(body.budget) },
+        ],
+        note: "Review the full intake in Studio under Build Intakes.",
+        ctaUrl: "https://luwahtechnologies.com/studio/structure/buildIntakes",
+        ctaLabel: "View in Studio",
+      });
     }
 
     const webhookUrl = process.env.N8N_WEB_WEBHOOK_URL;
