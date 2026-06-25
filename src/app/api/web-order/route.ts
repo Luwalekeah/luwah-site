@@ -6,6 +6,7 @@ import { signPayload } from "@/lib/signPayload";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
 import { getWebCatalog } from "@/lib/getWebCatalog";
 import { computeOrderTotal } from "@/lib/webCatalog";
+import { notifyEmail } from "@/lib/notifyEmail";
 
 /**
  * POST /api/web-order
@@ -87,6 +88,28 @@ export async function POST(request: Request) {
       } catch (err) {
         console.error("Failed to store web order:", err);
       }
+    }
+
+    if (stored) {
+      await notifyEmail({
+        subject: `New Luwah Technologies Web Order from ${String(body.fullName).slice(0, 200)}`,
+        heading: `New web order: ${totals.tierName}`,
+        badge: "New Order",
+        rows: [
+          { label: "Name", value: String(body.fullName).slice(0, 200) },
+          { label: "Email", value: String(body.email).slice(0, 200) },
+          { label: "Phone", value: body.phone ? String(body.phone).slice(0, 50) : "" },
+          { label: "Business", value: body.businessName ? String(body.businessName).slice(0, 200) : "" },
+          { label: "Tier", value: totals.tierName },
+          { label: "Add-ons", value: addonKeys.join(", ") },
+          { label: "Support plan", value: body.supportPlanKey || "" },
+          { label: "Estimated total", value: `$${totals.total.toLocaleString("en-US")}${totals.hasVariableItems ? " + quoted items" : ""}` },
+        ],
+        quote: body.notes ? String(body.notes).slice(0, 1000) : "",
+        note: "Logged in Studio under Web Orders. Send a quote within 24 to 48 hours.",
+        ctaUrl: "https://luwahtechnologies.com/studio/structure/webOrders",
+        ctaLabel: "View in Studio",
+      });
     }
 
     // Optional n8n forward. Off until the webhook env var is set.

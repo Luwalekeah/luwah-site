@@ -18,12 +18,14 @@ export default defineConfig({
           .items([
             // Submissions split by form so leads are easy to scan.
             S.listItem()
+              .id("submissions")
               .title("Submissions")
               .child(
                 S.list()
                   .title("Submissions")
                   .items([
                     S.listItem()
+                      .id("consultations")
                       .title("Consultations")
                       .child(
                         S.documentList()
@@ -32,6 +34,7 @@ export default defineConfig({
                           .defaultOrdering([{ field: "submittedAt", direction: "desc" }])
                       ),
                     S.listItem()
+                      .id("contactMessages")
                       .title("Contact Messages")
                       .child(
                         S.documentList()
@@ -60,6 +63,7 @@ export default defineConfig({
             S.divider(),
             // Web-build offering: orders and intakes from the /order and /intake forms.
             S.listItem()
+              .id("webOrders")
               .title("Web Orders")
               .child(
                 S.documentList()
