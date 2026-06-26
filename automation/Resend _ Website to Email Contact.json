@@ -1,0 +1,640 @@
+{
+  "name": "Resend | Website to Email Contact",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contact",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1504,
+        240
+      ],
+      "id": "a25da8ac-aca5-40ea-866e-04d2f95031d2",
+      "name": "Website Contact Received",
+      "webhookId": "a096cfae-2430-4945-b58a-8ee5a53de47a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "prep-msg",
+              "name": "message",
+              "value": "={{ JSON.stringify($json.body) }}",
+              "type": "string"
+            },
+            {
+              "id": "prep-sig",
+              "name": "receivedSignature",
+              "value": "={{ $json.headers[\"x-webhook-signature\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        240
+      ],
+      "id": "7e9cd87b-9dd3-4030-9282-e038b0f51c12",
+      "name": "Prepare the Data"
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json.message }}",
+        "secret": "SKVcTgLVfv0UnPQSncUht6n5CaTEiZgA0bDk8rZyUxU="
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        240
+      ],
+      "id": "d4e527ad-2e75-4bae-81cb-c2d4aa89b23f",
+      "name": "Crypto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "verify-hmac",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "={{ $('Prepare the Data').item.json.receivedSignature }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -832,
+        240
+      ],
+      "id": "e026e37d-0051-4b79-9ae7-93e1a507a018",
+      "name": "Verify Signature"
+    },
+    {
+      "parameters": {
+        "errorMessage": "HMAC verification failed — possible spam or key rotation needed. Rotate WEBHOOK_HMAC_SECRET on both Render and n8n."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        352
+      ],
+      "id": "8561161e-c34d-45f4-8567-829578010541",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-name",
+              "name": "senderName",
+              "value": "={{ $('Website Contact Received').item.json.body.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "field-email",
+              "name": "senderEmail",
+              "value": "={{ $('Website Contact Received').item.json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "field-phone",
+              "name": "senderPhone",
+              "value": "={{ $('Website Contact Received').item.json.body.phone || 'Not provided' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-company",
+              "name": "senderCompany",
+              "value": "={{ $('Website Contact Received').item.json.body.companyName || 'Not provided' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-industry",
+              "name": "senderIndustry",
+              "value": "={{ $('Website Contact Received').item.json.body.industry || 'Not provided' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-challenge",
+              "name": "senderChallenge",
+              "value": "={{ $('Website Contact Received').item.json.body.message || 'Not provided' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-budget",
+              "name": "senderBudget",
+              "value": "={{ $('Website Contact Received').item.json.body.budget_range || 'Not specified' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-urgency",
+              "name": "senderUrgency",
+              "value": "={{ $('Website Contact Received').item.json.body.urgency || 'Not specified' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-preferred",
+              "name": "preferredContact",
+              "value": "={{ $('Website Contact Received').item.json.body.preferred_contact || 'Email' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-referral",
+              "name": "referralSource",
+              "value": "={{ $('Website Contact Received').item.json.body.referral_source || 'Not specified' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-submission-id",
+              "name": "submissionId",
+              "value": "={{ $('Website Contact Received').item.json.body.submission_id ? ($('Website Contact Received').item.json.body.submission_id.length > 10 ? $('Website Contact Received').item.json.body.submission_id.slice(0, 6) : $('Website Contact Received').item.json.body.submission_id) : Math.random().toString(36).slice(2, 8) }}",
+              "type": "string"
+            },
+            {
+              "id": "field-help-areas",
+              "name": "helpAreas",
+              "value": "={{ ($('Website Contact Received').item.json.body.help_areas || []).join(', ') || 'Not specified' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-tools-pos",
+              "name": "toolsPOS",
+              "value": "={{ $('Website Contact Received').item.json.body.pos || 'None' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-tools-booking",
+              "name": "toolsBooking",
+              "value": "={{ $('Website Contact Received').item.json.body.booking || 'None' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-tools-accounting",
+              "name": "toolsAccounting",
+              "value": "={{ $('Website Contact Received').item.json.body.accounting || 'None' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-lead-status",
+              "name": "leadStatus",
+              "value": "={{ $('Website Contact Received').item.json.body.lead_status || 'complete' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-ip-hash",
+              "name": "ipHash",
+              "value": "={{ $('Website Contact Received').item.json.body.metadata?.ip_hash || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "field-submitted-at",
+              "name": "submittedAt",
+              "value": "={{ $('Website Contact Received').item.json.body.metadata?.submitted_at || new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        112
+      ],
+      "id": "cf04ff8a-72b7-40a1-8a01-f7911a62dcd2",
+      "name": "Set Contact Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// PROFANITY DETECTION + SENTIMENT ANALYSIS\n// Mirrors the DRC Google Apps Script logic\n// ============================================\n\nconst input = $input.first().json;\n\n// --- Profanity Detection ---\nconst PROFANITY_LIST = [\n  'fuck', 'shit', 'damn', 'ass', 'bitch', 'bastard', 'crap',\n  'dick', 'piss', 'hell', 'douche', 'asshole', 'bullshit',\n  'motherfucker', 'wtf', 'stfu', 'lmao', 'dumbass'\n];\n\nfunction checkProfanity(text) {\n  if (!text) return { flagged: false, words: [] };\n  const lower = text.toLowerCase();\n  const matched = [];\n  for (const word of PROFANITY_LIST) {\n    const regex = new RegExp(`(?<![a-z])${word}(?![a-z])`, 'gi');\n    if (regex.test(lower)) matched.push(word);\n  }\n  return { flagged: matched.length > 0, words: matched };\n}\n\n// --- Sentiment Analysis ---\nconst SENTIMENT_RULES = [\n  {\n    category: 'Churn Risk',\n    priority: 'HIGH',\n    color: '#FF4444',\n    triggers: ['cancel', 'cancellation', 'leaving', 'leave', 'switching',\n               'switch', 'going elsewhere', 'not coming back', 'done with',\n               'not renewing', 'ending my', 'quit', 'dropping']\n  },\n  {\n    category: 'Unresponsive',\n    priority: 'HIGH',\n    color: '#FF4444',\n    triggers: ['no one answers', 'nobody answers', 'never heard back',\n               'no response', 'not responding', 'ignoring', 'ignored',\n               'ghosting', 'ghosted', 'waiting for days', 'called multiple times',\n               'emailed multiple times', 'still waiting']\n  },\n  {\n    category: 'Dissatisfaction',\n    priority: 'MEDIUM',\n    color: '#FF8C00',\n    triggers: ['ridiculous', 'unacceptable', 'disappointed', 'disappointing',\n               'frustrating', 'frustrated', 'terrible', 'horrible', 'awful',\n               'worst', 'waste of time', 'waste of money', 'rip off',\n               'unprofessional', 'incompetent', 'useless']\n  },\n  {\n    category: 'Urgency',\n    priority: 'LOW',\n    color: '#FFD700',\n    triggers: ['asap', 'as soon as possible', 'immediately', 'urgent',\n               'urgently', 'right away', 'time sensitive', 'deadline',\n               'need this today', 'need this now', 'rush', 'critical']\n  }\n];\n\nfunction checkSentiment(text) {\n  if (!text) return { priority: 'Neutral', category: '', triggers: [], color: '#FFFFFF' };\n  const lower = text.toLowerCase();\n  \n  for (const rule of SENTIMENT_RULES) {\n    const matched = [];\n    for (const trigger of rule.triggers) {\n      const regex = new RegExp(`(?<![a-z])${trigger.replace(/\\s+/g, '\\\\s+')}(?![a-z])`, 'gi');\n      if (regex.test(lower)) matched.push(trigger);\n    }\n    if (matched.length > 0) {\n      return {\n        priority: rule.priority,\n        category: rule.category,\n        triggers: matched,\n        color: rule.color\n      };\n    }\n  }\n  \n  return { priority: 'Neutral', category: '', triggers: [], color: '#333333' };\n}\n\n// --- Run checks ---\nconst textToAnalyze = `${input.senderChallenge || ''} ${input.senderName || ''}`;\nconst profanity = checkProfanity(textToAnalyze);\nconst sentiment = checkSentiment(textToAnalyze);\n\nreturn [{\n  json: {\n    ...input,\n    languageFlag: profanity.flagged ? 'FLAGGED' : 'Clean',\n    flaggedWords: profanity.words.join(', ') || '',\n    sentimentPriority: sentiment.priority,\n    sentimentCategory: sentiment.category,\n    sentimentTriggers: sentiment.triggers.join(', ') || '',\n    sentimentColor: sentiment.color,\n    requiresAttention: sentiment.priority === 'HIGH' || profanity.flagged\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        112
+      ],
+      "id": "cb726024-8e14-49b5-bb64-49fdd4a6e452",
+      "name": "Profanity & Sentiment Check"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO consultation_submissions (\n    submission_id, created_at, full_name, email, phone,\n    business_name, industry, pos_system, booking_software, accounting_tool,\n    biggest_challenge, help_areas, urgency, budget_range,\n    preferred_contact, referral_source, ip_address, turnstile_passed,\n    status, language_flag, flagged_words,\n    sentiment_priority, sentiment_category, sentiment_triggers, updated_at\n) VALUES (\n    '{{ $json.submissionId }}',\n    '{{ $json.submittedAt.split(\".\")[0].replace(\"T\", \" \") }}',\n    '{{ $json.senderName.replace(/'/g, \"''\") }}',\n    '{{ $json.senderEmail }}',\n    '{{ $json.senderPhone }}',\n    '{{ $json.senderCompany.replace(/'/g, \"''\") }}',\n    '{{ $json.senderIndustry }}',\n    '{{ $json.toolsPOS }}',\n    '{{ $json.toolsBooking }}',\n    '{{ $json.toolsAccounting }}',\n    '{{ $json.senderChallenge.replace(/'/g, \"''\") }}',\n    '{{ $json.helpAreas }}',\n    '{{ $json.senderUrgency }}',\n    '{{ $json.senderBudget }}',\n    '{{ $json.preferredContact }}',\n    '{{ $json.referralSource }}',\n    '{{ $json.ipHash }}',\n    TRUE,\n    'new',\n    '{{ $json.languageFlag }}',\n    '{{ $json.flaggedWords }}',\n    '{{ $json.sentimentPriority }}',\n    '{{ $json.sentimentCategory }}',\n    '{{ $json.sentimentTriggers }}',\n    NOW()\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        304,
+        -96
+      ],
+      "id": "7c14bfb2-55b5-4d1e-abba-837038012e8d",
+      "name": "INSERT INTO MySQL",
+      "credentials": {
+        "mySql": {
+          "id": "qwxdFazAaKXspD9I",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/me/drive/items/F4C86A8B-945F-40C0-A649-E73F6F557B07/workbook/worksheets/Submissions/tables/SubmissionsTable/rows",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOutlookOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"values\": [\n    [\n      \"{{ $json.submissionId }}\",\n      \"{{ $json.submittedAt }}\",\n      \"{{ $json.sentimentPriority }}\",\n      \"{{ $json.sentimentCategory }}\",\n      \"{{ $json.sentimentTriggers }}\",\n      \"{{ $json.languageFlag }}\",\n      \"{{ $json.flaggedWords }}\",\n      \"{{ $json.senderName.replace(/\"/g, '\\\\\"') }}\",\n      \"{{ $json.senderCompany.replace(/\"/g, '\\\\\"') }}\",\n      \"{{ $json.senderIndustry }}\",\n      \"{{ $json.senderEmail }}\",\n      \"{{ $json.senderPhone }}\",\n      \"{{ $json.senderChallenge.replace(/\"/g, '\\\\\"').replace(/\\n/g, ' ') }}\",\n      \"{{ $json.helpAreas }}\",\n      \"{{ $json.senderBudget }}\",\n      \"{{ $json.senderUrgency }}\",\n      \"{{ $json.preferredContact }}\",\n      \"{{ $json.referralSource }}\",\n      \"{{ $json.toolsPOS }}\",\n      \"{{ $json.toolsBooking }}\",\n      \"{{ $json.toolsAccounting }}\",\n      \"{{ $json.leadStatus }}\",\n      \"{{ $json.ipHash }}\"\n    ]\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        304,
+        96
+      ],
+      "id": "9e2dc8de-b813-4e29-a02a-d4bec4a56f0d",
+      "name": "Append to Excel (OneDrive)",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "CN8aAVm60oyYRHX2",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"Daniel Cooke <daniel@luwahtechnologies.com>\",\n  \"to\": \"{{ $('Profanity & Sentiment Check').item.json.senderEmail }}\",\n  \"subject\": \"Got it — I'll be in touch within 24 hours\",\n  \"html\": \"<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'><div style='background-color: #1A1A2E; padding: 30px; text-align: center;'><h1 style='color: #B87333; margin: 0; font-size: 22px;'>Luwah Technologies</h1><p style='color: rgba(255,255,255,0.5); margin: 5px 0 0; font-size: 12px;'>Where Simplicity Meets Innovation</p></div><div style='padding: 30px; background-color: #f9f9f9; color: #333;'><p>Hi {{ $('Profanity & Sentiment Check').item.json.senderName.split(' ')[0] }},</p><p>Thanks for reaching out. I've received your consultation request and I'm already reviewing the details about {{ $('Profanity & Sentiment Check').item.json.senderCompany }}.</p><p><strong>Here's what happens next:</strong></p><ul style='padding-left: 20px; color: #555;'><li style='margin-bottom: 8px;'>I'll review your submission and do some prep work so our conversation is immediately useful</li><li style='margin-bottom: 8px;'>You'll hear from me within 24 hours to schedule our free 30-minute consultation</li><li style='margin-bottom: 8px;'>The call will focus specifically on what you described — no generic sales pitch</li></ul><p style='margin-top: 20px; padding: 12px; background-color: #f0f0f0; border-radius: 6px; font-size: 13px; color: #666;'>Your reference number is <strong>{{ $('Profanity & Sentiment Check').item.json.submissionId }}</strong></p><p style='margin-top: 25px;'>Talk soon,<br/><strong>Daniel Cooke</strong><br/>Luwah Technologies LLC<br/><span style='color: #4A90A4;'>(720) 421-7184</span> | <a href='https://luwahtechnologies.com' style='color: #4A90A4;'>luwahtechnologies.com</a></p></div><div style='background-color: #1A1A2E; padding: 15px; text-align: center;'><p style='color: rgba(255,255,255,0.4); font-size: 11px; margin: 0;'>Luwah Technologies LLC | Aurora, CO | <a href='https://luwahtechnologies.com/privacy' style='color: rgba(255,255,255,0.4);'>Privacy Policy</a></p></div></div>\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        592,
+        0
+      ],
+      "id": "b61801c2-6258-41b3-aee8-fb6e01a4000a",
+      "name": "Resend → Confirm to User",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9yTTJOsiiQ7zaoYS",
+          "name": "Resend"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/items/F4C86A8B-945F-40C0-A649-E73F6F557B07/workbook/worksheets/Log/tables/LogTable/rows",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOutlookOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"values\": [\n    [\n      \"{{ new Date().toISOString() }}\",\n      \"{{ $('Profanity & Sentiment Check').item.json.submissionId }}\",\n      \"{{ $('INSERT INTO MySQL').isError ? 'Error' : 'Success' }}\",\n      \"{{ $('Append to Excel (OneDrive)').isError ? 'Error' : 'Success' }}\",\n      \"{{ $('Resend → Notify Daniel').isError ? 'Error' : 'Sent' }}\",\n      \"{{ $('Resend → Confirm to User').isError ? 'Error' : 'Sent' }}\",\n      \"{{ $('Profanity & Sentiment Check').item.json.sentimentPriority }}\",\n      \"{{ $('Profanity & Sentiment Check').item.json.languageFlag }}\",\n      \"Processed {{ $('Profanity & Sentiment Check').item.json.senderName }} ({{ $('Profanity & Sentiment Check').item.json.senderCompany }})\"\n    ]\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        848,
+        -192
+      ],
+      "id": "9fa07df3-5c4a-469f-9eb3-d31d76042b0c",
+      "name": "Write Execution Log (Excel)",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "CN8aAVm60oyYRHX2",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2ad5d520-e6f4-4f25-94d1-ca7e894b505e",
+              "leftValue": "={{ $('Website Contact Received').item.json.body.form_type }}",
+              "rightValue": "consultation",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        112
+      ],
+      "id": "7c458471-f03f-4a27-82a3-ef417a5b712a",
+      "name": "Form Type?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO consultation_submissions (\n    submission_id, created_at, full_name, email, phone,\n    business_name, biggest_challenge,\n    referral_source, status, language_flag, flagged_words,\n    sentiment_priority, sentiment_category, sentiment_triggers, updated_at\n) VALUES (\n    '{{ $json.submissionId }}',\n    '{{ $json.submittedAt.split(\".\")[0].replace(\"T\", \" \") }}',\n    '{{ $json.senderName.replace(/'/g, \"''\") }}',\n    '{{ $json.senderEmail }}',\n    '{{ $json.senderPhone }}',\n    '{{ $json.senderCompany.replace(/'/g, \"''\") }}',\n    '{{ $json.senderChallenge.replace(/'/g, \"''\") }}',\n    '{{ $json.referralSource }}',\n    'new',\n    '{{ $json.languageFlag }}',\n    '{{ $json.flaggedWords }}',\n    '{{ $json.sentimentPriority }}',\n    '{{ $json.sentimentCategory }}',\n    '{{ $json.sentimentTriggers }}',\n    NOW()\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        304,
+        544
+      ],
+      "id": "e4cd7bbf-f902-4b8b-abf2-8cff21f42f8a",
+      "name": "INSERT INTO MySQL1",
+      "credentials": {
+        "mySql": {
+          "id": "qwxdFazAaKXspD9I",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/me/drive/items/F4C86A8B-945F-40C0-A649-E73F6F557B07/workbook/worksheets/Submissions/tables/SubmissionsTable/rows",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOutlookOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"values\": [\n    [\n      \"{{ $json.submissionId }}\",\n      \"{{ $json.submittedAt }}\",\n      \"{{ $json.sentimentPriority }}\",\n      \"{{ $json.sentimentCategory }}\",\n      \"{{ $json.sentimentTriggers }}\",\n      \"{{ $json.languageFlag }}\",\n      \"{{ $json.flaggedWords }}\",\n      \"{{ $json.senderName }}\",\n      \"{{ $json.senderCompany }}\",\n      \"\",\n      \"{{ $json.senderEmail }}\",\n      \"{{ $json.senderPhone }}\",\n      \"{{ $json.senderChallenge.replace(/\"/g, '\\\\\"').replace(/\\n/g, ' ') }}\",\n      \"\",\n      \"\",\n      \"\",\n      \"\",\n      \"{{ $json.referralSource }}\",\n      \"\",\n      \"\",\n      \"\",\n      \"{{ $json.leadStatus }}\",\n      \"\"\n    ]\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        304,
+        336
+      ],
+      "id": "891cda3f-8d2d-4bfc-b5c1-f8f31c875782",
+      "name": "Append to Excel (OneDrive)1",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "CN8aAVm60oyYRHX2",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"Daniel Cooke <daniel@luwahtechnologies.com>\",\n  \"to\": \"{{ $('Profanity & Sentiment Check').item.json.senderEmail }}\",\n  \"subject\": \"Thanks for reaching out — I'll reply shortly\",\n  \"html\": \"<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'><div style='background-color: #1A1A2E; padding: 30px; text-align: center;'><h1 style='color: #B87333; margin: 0; font-size: 22px;'>Luwah Technologies</h1><p style='color: rgba(255,255,255,0.5); margin: 5px 0 0; font-size: 12px;'>Where Simplicity Meets Innovation</p></div><div style='padding: 30px; background-color: #f9f9f9; color: #333;'><p>Hi {{ $('Profanity & Sentiment Check').item.json.senderName.split(' ')[0] }},</p><p>Thanks for getting in touch. I received your message and will respond within 24 hours.</p><p>If this is time-sensitive, feel free to call me directly at <strong>(720) 421-7184</strong>.</p><p style='margin-top: 25px;'>Talk soon,<br/><strong>Daniel Cooke</strong><br/>Luwah Technologies LLC<br/><a href='https://luwahtechnologies.com' style='color: #4A90A4;'>luwahtechnologies.com</a></p></div><div style='background-color: #1A1A2E; padding: 15px; text-align: center;'><p style='color: rgba(255,255,255,0.4); font-size: 11px; margin: 0;'>Luwah Technologies LLC | Aurora, CO</p></div></div>\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        592,
+        640
+      ],
+      "id": "ab8f682d-169c-4747-bcb1-b71b956bff84",
+      "name": "Resend → Confirm to User1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9yTTJOsiiQ7zaoYS",
+          "name": "Resend"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/items/F4C86A8B-945F-40C0-A649-E73F6F557B07/workbook/worksheets/Log/tables/LogTable/rows",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOutlookOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"values\": [\n    [\n      \"{{ new Date().toISOString() }}\",\n      \"{{ $('Profanity & Sentiment Check').item.json.submissionId }}\",\n      \"{{ $('INSERT INTO MySQL1').isError ? 'Error' : 'Success' }}\",\n      \"{{ $('Append to Excel (OneDrive)1').isError ? 'Error' : 'Success' }}\",\n      \"{{ $('Resend → Notify Daniel1').isError ? 'Error' : 'Sent' }}\",\n      \"{{ $('Resend → Confirm to User1').isError ? 'Error' : 'Sent' }}\",\n      \"{{ $('Profanity & Sentiment Check').item.json.sentimentPriority }}\",\n      \"{{ $('Profanity & Sentiment Check').item.json.languageFlag }}\",\n      \"Processed {{ $('Profanity & Sentiment Check').item.json.senderName }} ({{ $('Profanity & Sentiment Check').item.json.senderCompany }})\"\n    ]\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        848,
+        448
+      ],
+      "id": "fd8a9ab2-68f9-4b33-8acf-cf3c65f7acb3",
+      "name": "Write Execution Log (Excel)1",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "CN8aAVm60oyYRHX2",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Website Contact Received": {
+      "main": [
+        [
+          {
+            "node": "Prepare the Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare the Data": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Signature": {
+      "main": [
+        [
+          {
+            "node": "Set Contact Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Contact Fields": {
+      "main": [
+        [
+          {
+            "node": "Profanity & Sentiment Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Profanity & Sentiment Check": {
+      "main": [
+        [
+          {
+            "node": "Form Type?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INSERT INTO MySQL": {
+      "main": [
+        [
+          {
+            "node": "Write Execution Log (Excel)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resend → Confirm to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form Type?": {
+      "main": [
+        [
+          {
+            "node": "INSERT INTO MySQL",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append to Excel (OneDrive)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "INSERT INTO MySQL1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append to Excel (OneDrive)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INSERT INTO MySQL1": {
+      "main": [
+        [
+          {
+            "node": "Write Execution Log (Excel)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resend → Confirm to User1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9e085a99-017f-4323-925e-76dd44d36c4d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "50b32ccf16742a3b10302e13dd0eb996d8fbdde288758b22ed76eb18b82f3c3d"
+  },
+  "id": "nTQiOAtStv8ToeQU",
+  "tags": []
+}
