@@ -1,0 +1,420 @@
+{
+  "name": "Resend | Website Web Forms (Orders, Intakes, Reviews)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "web-submissions",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1504,
+        240
+      ],
+      "id": "a25da8ac-aca5-40ea-866e-04d2f95031d2",
+      "name": "Web Submission Received",
+      "webhookId": "web-submissions-hook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "prep-msg",
+              "name": "message",
+              "value": "={{ JSON.stringify($json.body) }}",
+              "type": "string"
+            },
+            {
+              "id": "prep-sig",
+              "name": "receivedSignature",
+              "value": "={{ $json.headers[\"x-webhook-signature\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        240
+      ],
+      "id": "7e9cd87b-9dd3-4030-9282-e038b0f51c12",
+      "name": "Prepare the Data"
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json.message }}",
+        "secret": "SKVcTgLVfv0UnPQSncUht6n5CaTEiZgA0bDk8rZyUxU="
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        240
+      ],
+      "id": "d4e527ad-2e75-4bae-81cb-c2d4aa89b23f",
+      "name": "Crypto"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "verify-hmac",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "={{ $('Prepare the Data').item.json.receivedSignature }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -832,
+        240
+      ],
+      "id": "e026e37d-0051-4b79-9ae7-93e1a507a018",
+      "name": "Verify Signature"
+    },
+    {
+      "parameters": {
+        "errorMessage": "HMAC verification failed — possible spam or key rotation needed. Rotate WEBHOOK_HMAC_SECRET on both Render and n8n."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        352
+      ],
+      "id": "8561161e-c34d-45f4-8567-829578010541",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Web Submission Received').item.json.body.form_type }}",
+                    "rightValue": "web-order",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "web-order"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Web Submission Received').item.json.body.form_type }}",
+                    "rightValue": "build-intake",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "build-intake"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Web Submission Received').item.json.body.form_type }}",
+                    "rightValue": "review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "review"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Form Type Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        600,
+        400
+      ],
+      "id": "form-type-switch"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO web_orders (submission_id, created_at, full_name, email, phone, business_name, tier, addons, extra_pages, support_plan, estimated_total, has_variable_items, notes, ip_hash)\nVALUES (\n  '{{ $json.body.submission_id }}', '{{ ($json.body.metadata.submitted_at||'').split('.')[0].replace('T',' ') }}',\n  '{{ ($json.body.fullName||'').replace(/'/g,\"''\") }}', '{{ $json.body.email }}', '{{ $json.body.phone||'' }}',\n  '{{ ($json.body.businessName||'').replace(/'/g,\"''\") }}', '{{ $json.body.tierName }}', '{{ ($json.body.addonKeys||[]).join(', ') }}',\n  '{{ $json.body.extraPages||0 }}', '{{ $json.body.supportPlanKey||'' }}', '{{ $json.body.estimatedTotal||0 }}',\n  '{{ $json.body.hasVariableItems?1:0 }}', '{{ ($json.body.notes||'').replace(/'/g,\"''\") }}', '{{ $json.body.metadata.ip_hash }}'\n);",
+        "options": {}
+      },
+      "name": "INSERT web_orders",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        850,
+        200
+      ],
+      "id": "insert-web_orders",
+      "credentials": {
+        "mySql": {
+          "id": "qwxdFazAaKXspD9I",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"Daniel Cooke <daniel@luwahtechnologies.com>\",\n  \"to\": \"{{ $('Web Submission Received').item.json.body.email }}\",\n  \"subject\": \"We received your order request — Luwah Technologies\",\n  \"html\": \"<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto'><div style='background:#0c0a14;padding:28px;text-align:center'><h1 style='color:#D4924F;margin:0;font-size:22px'>Luwah Technologies</h1></div><div style='padding:28px;background:#f7f7f7;color:#333'><p>Hi {{ $('Web Submission Received').item.json.body.fullName || 'there' }},</p><p>Thanks for your order request. We received it and will follow up within 24 to 48 hours.</p><p>— Daniel, Luwah Technologies</p></div></div>\"\n}",
+        "options": {}
+      },
+      "name": "Confirm web-order",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1120,
+        200
+      ],
+      "id": "confirm-web-order",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9yTTJOsiiQ7zaoYS",
+          "name": "Resend"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO build_intakes (submission_id, created_at, business_name, contact_name, email, phone, industry, tier, timeline, budget, mission, target_audience, pages, ip_hash)\nVALUES (\n  '{{ $json.body.submissionId }}', '{{ ($json.body.submittedAt||'').split('.')[0].replace('T',' ') }}',\n  '{{ ($json.body.businessName||'').replace(/'/g,\"''\") }}', '{{ ($json.body.contactName||'').replace(/'/g,\"''\") }}', '{{ $json.body.email }}', '{{ $json.body.phone||'' }}',\n  '{{ $json.body.industry||'' }}', '{{ $json.body.tier||'' }}', '{{ $json.body.timeline||'' }}', '{{ $json.body.budget||'' }}',\n  '{{ ($json.body.mission||'').replace(/'/g,\"''\") }}', '{{ ($json.body.targetAudience||'').replace(/'/g,\"''\") }}', '{{ ($json.body.pages||[]).join(', ') }}', '{{ $json.body.ipHash }}'\n);",
+        "options": {}
+      },
+      "name": "INSERT build_intakes",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        850,
+        420
+      ],
+      "id": "insert-build_intakes",
+      "credentials": {
+        "mySql": {
+          "id": "qwxdFazAaKXspD9I",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"Daniel Cooke <daniel@luwahtechnologies.com>\",\n  \"to\": \"{{ $('Web Submission Received').item.json.body.email }}\",\n  \"subject\": \"We received your build intake — Luwah Technologies\",\n  \"html\": \"<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto'><div style='background:#0c0a14;padding:28px;text-align:center'><h1 style='color:#D4924F;margin:0;font-size:22px'>Luwah Technologies</h1></div><div style='padding:28px;background:#f7f7f7;color:#333'><p>Hi {{ $('Web Submission Received').item.json.body.fullName || 'there' }},</p><p>Thanks for your build intake. We received it and will follow up within 24 to 48 hours.</p><p>— Daniel, Luwah Technologies</p></div></div>\"\n}",
+        "options": {}
+      },
+      "name": "Confirm build-intake",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1120,
+        420
+      ],
+      "id": "confirm-build-intake",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9yTTJOsiiQ7zaoYS",
+          "name": "Resend"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reviews (created_at, reviewer_name, company, role, overall, communication, expertise, timeliness, value_rating, recommend, quote, ip_hash)\nVALUES (\n  '{{ ($json.body.metadata.submitted_at||'').split('.')[0].replace('T',' ') }}',\n  '{{ ($json.body.reviewerName||'').replace(/'/g,\"''\") }}', '{{ ($json.body.company||'').replace(/'/g,\"''\") }}', '{{ ($json.body.role||'').replace(/'/g,\"''\") }}',\n  '{{ $json.body.overall }}', '{{ $json.body.ratings.communication }}', '{{ $json.body.ratings.expertise }}', '{{ $json.body.ratings.timeliness }}', '{{ $json.body.ratings.value }}', '{{ $json.body.ratings.recommend }}',\n  '{{ ($json.body.quote||'').replace(/'/g,\"''\") }}', '{{ $json.body.metadata.ip_hash }}'\n);",
+        "options": {}
+      },
+      "name": "INSERT reviews",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        850,
+        640
+      ],
+      "id": "insert-reviews",
+      "credentials": {
+        "mySql": {
+          "id": "qwxdFazAaKXspD9I",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Web Submission Received": {
+      "main": [
+        [
+          {
+            "node": "Prepare the Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare the Data": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Signature": {
+      "main": [
+        [
+          {
+            "node": "Form Type Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop and Error": {
+      "main": [
+        []
+      ]
+    },
+    "Form Type Switch": {
+      "main": [
+        [
+          {
+            "node": "INSERT web_orders",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "INSERT build_intakes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "INSERT reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INSERT web_orders": {
+      "main": [
+        [
+          {
+            "node": "Confirm web-order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INSERT build_intakes": {
+      "main": [
+        [
+          {
+            "node": "Confirm build-intake",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
