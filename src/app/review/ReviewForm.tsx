@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Star, Check } from "lucide-react";
 import { Turnstile } from "@/components/Turnstile";
 import { RATING_CATEGORIES, computeOverall, type RatingKey, type Ratings } from "@/lib/reviews";
@@ -50,6 +50,19 @@ export function ReviewForm() {
   const handleToken = useCallback((t: string) => setTurnstileToken(t), []);
   const handleExpire = useCallback(() => setTurnstileToken(null), []);
   const setRating = (key: RatingKey, v: number) => setRatings((r) => ({ ...r, [key]: v }));
+
+  // After a successful submission, reset the form to default after 10 seconds
+  // so the next visitor on a shared device starts fresh.
+  useEffect(() => {
+    if (status !== "sent") return;
+    const timer = setTimeout(() => {
+      setForm({ reviewerName: "", company: "", role: "", quote: "" });
+      setRatings(ZERO);
+      setTurnstileToken(null);
+      setStatus("idle");
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [status]);
 
   const allRated = RATING_CATEGORIES.every((c) => ratings[c.key] >= 1);
   const overall = allRated ? computeOverall(ratings) : 0;
